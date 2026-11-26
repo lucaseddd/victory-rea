@@ -16,7 +16,7 @@ Rules:
 
 - **One folder per candidate.** Never rebuild on top of a candidate that has already been measured. Copy the source, apply the change and build into `cand<N+1>`.
 - **The title dump is read-only.** Nobody writes to it.
-- **Derived data outside the repository.** Shader and pipeline caches, saves, captures and logs stay in the run folder. The harness launcher refuses a run folder inside the repository.
+- **Derived data outside the repository.** Shader and pipeline caches, saves, captures and logs stay in the pipeline's `work_dir`. The harness refuses a `work_dir` inside the repository.
 
 ## Offline
 
@@ -42,7 +42,7 @@ cargo rustc --offline --locked --release --features diagnostics -p victory --bin
 ## Before running
 
 ```powershell
-.\harness\Iniciar-Rodada.ps1 -Config .\harness\harness.toml -MapOnly
+.\harness\Rodar-Versao.ps1 -Versao ultima -MapOnly
 ```
 
-`-MapOnly` maps the title without running it, checking the hash, the firewall and missing imports. Exit 0 with 0 missing imports is the minimum before asking for the GPU.
+`-MapOnly` maps the title without running it, after checking the version's hash and the firewall rules, and reports missing imports. Exit 0 with 0 missing imports is the minimum before asking for the GPU.

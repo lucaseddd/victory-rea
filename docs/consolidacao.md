@@ -13,12 +13,12 @@ Every so often, a stronger AI (R00, or the one the user designates) closes a cyc
    - the exe and its hash;
    - the PDB GUID/age;
    - the `VICTORY_*` variables that changed.
-4. **Measure.** Reserve the GPU (local lock) and run `harness/Iniciar-Rodada.ps1 -Rapido`, plus the Series X reference, with a cold and a warm cache. The watcher computes the score when the game closes.
+4. **Measure.** Reserve the GPU (local lock) and run `harness/Pipeline.ps1` (or `Rodar-Versao.ps1` on a built version) with the `rapido` profile, plus the `series-x` reference. Run each once cold and once warm. The watcher computes the score, and the FPS-drop check compares the warm run with the previous version.
 5. **Publish.** Open a PR with `consolidacao/<YYYY-MM-DD>-cand<N>.md` and update `docs/indice.md`. Open Issues for new regressions (label `image-regression`).
 
 ## Score
 
-The score comes from the automated test ([harness/](../harness/README.md#score)): progress 30, speed 25, loading 20, shaders 15, image 10. It is computed on the local machine; only the components, milestones and total go into the repository.
+The score comes from the automated pipeline ([harness/](../harness/README.md#score-0100)): progress 25, speed 20, loading 20, stability 15, shaders 10, image 10. It is computed on the local machine; only the components, milestones, total, drop-check findings and scoreboard rows go into the repository.
 
 The consolidation report cites the SHA-256 of `Vigiar-Rodada.ps1`, so scores from different cycles stay comparable. Alongside the score, also publish:
 
@@ -40,5 +40,8 @@ These do not count toward the score, but they explain it.
 | Scene | Cache | FPS | Median ms | p95 ms | % > 33.33 ms | PSO wait p95 ms | Image | Peak VRAM MB |
 |---|---|---|---|---|---|---|---|---|
 
-Score: <total> (progress <a> · speed <b> · loading <c> · shaders <d> · image <e>) [obs-local]
+Score: <total> (progress <a> · speed <b> · loading <c> · stability <d> · shaders <e> · image <f>) [obs-local]
+Drop check vs <previous version>: <OK | REGRESSION> — <findings>
+
+<scoreboard rows from placar.md for the versions in this cycle>
 ```

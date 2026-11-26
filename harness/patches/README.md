@@ -8,7 +8,7 @@ The automated test depends on variables that exist neither in upstream VIctory n
 |---|---|---|---|---|
 | 01 | [dstorage-stats](01-dstorage-stats.md) | `VICTORY_DSTORAGE_STATS` | local (candidate 2) | the extractor's DirectStorage lines; loading diagnostics |
 | 02 | [texture-floor](02-texture-floor.md) | `VICTORY_TEXTURE_FLOOR_MB`; `VICTORY_TEXTURE_AUTO_VRAM` becomes opt-in | local (candidate 3, R13) | `-PisoTexturasMB`; avoids the black cutscene on 6 GB cards |
-| 03 | [planos-series-s-pr1081](03-planos-series-s-pr1081.md) | `VICTORY_PLANES`, `VICTORY_PLANE_ALPHA` | port of fxceless PR #1081 (head `08ab0418`) | `-Rapido` / `--console series-s` with a visible image |
+| 03 | [planos-series-s-pr1081](03-planos-series-s-pr1081.md) | `VICTORY_PLANES`, `VICTORY_PLANE_ALPHA` | port of fxceless PR #1081 (head `08ab0418`) | `-Perfil rapido` / `--console series-s` with a visible image |
 | 04 | [keys-file](04-keys-file.md) | `VICTORY_KEYS_FILE` | local (candidate 4) | the watcher's automatic Enter |
 | 05 | [dstorage-workers](05-dstorage-workers.md) | `VICTORY_DSTORAGE_WORKERS` | local (candidate 4) | `-DiscoWorkers` (optional) |
 | 06 | [small-why](06-small-why.md) | `small levels on a full card` line | local (candidate 2) | mipmap diagnostics (optional) |

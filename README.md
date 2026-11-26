@@ -3,7 +3,7 @@
 This repository brings together three pieces for running an Xbox Series title at 30 rendered FPS, with a correct image, on [VIctory](https://github.com/Marvisak/VIctory):
 
 1. **A REA guide.** How to use assisted reverse engineering (source + PDB + PE, with Ghidra and `dumpbin`) to understand the runtime, measure it and propose changes. → [guia/](guia/README.md)
-2. **An automated test with a score.** A launcher and a watcher run the title, press Enter on their own until the first 3D scene, record timestamps and give a 0–100 score for progress, speed, loading, shaders and image. → [harness/](harness/README.md)
+2. **An automated test with a score.** A pipeline (build → version → run → score → FPS-drop check → scoreboard) runs with no key presses. It compiles a version, runs the title, presses Enter through the menus, detects the first 3D scene and when the game becomes playable, and closes the game. Each run gets a 0–100 score for progress, speed, loading, stability, shaders and image, and is compared with the previous version to flag FPS regressions. → [harness/](harness/README.md)
 3. **Coordination of several AIs in parallel.** One Issue per task, one area per AI, one PR per attempt, and a stronger AI that consolidates, builds a candidate and runs the test. → [CONTRIBUTING.md](CONTRIBUTING.md)
 
 **Only text goes in here.** The game, executables, raw logs and captures stay on the local machine. See [POLITICA-DE-DADOS.md](POLITICA-DE-DADOS.md) (data policy).
@@ -12,33 +12,30 @@ This repository brings together three pieces for running an Xbox Series title at
 
 Read the guide: start with [guia/README.md](guia/README.md) and the [area map](guia/05-areas.md).
 
-Run the test (PowerShell as administrator, with a `victory.exe` built with the [patches](harness/patches/README.md)):
+Run the pipeline in PowerShell as administrator, on a VIctory source tree with the [patches](harness/patches/README.md) applied, after the [one-time setup](harness/README.md#one-time-setup):
 
 ```powershell
 Copy-Item .\harness\harness.example.toml .\harness\harness.toml
 ```
 
 ```powershell
-.\harness\Iniciar-Rodada.ps1 -Config .\harness\harness.toml -Rapido -MapOnly
+.\harness\Pipeline.ps1 -Fonte 'D:\victory\cand4' -Nome 'my-change' -Notas 'what changed'
 ```
 
-```powershell
-.\harness\Iniciar-Rodada.ps1 -Config .\harness\harness.toml -Rapido -FecharAposJogavelS 120
-```
-
-Press F9 when the game becomes playable. The score is written to `<log>.score.md` in the run folder.
+Nothing to press: the run ends by itself. The score goes to `<work_dir>\rodadas\<run>.score.md`, and the history goes to `<work_dir>\placar.md`.
 
 ## Score
 
 | Component | Weight | Summary |
 |---|---|---|
-| progresso (progress) | 30 | image (10) → first 3D scene (50) → playable (100) |
-| velocidade (speed) | 25 | median in-world FPS ÷ 30 |
-| carregamento (loading) | 20 | first 3D scene within 60 s = 100; at 20 min = 0 |
-| shaders | 15 | % of draws not dropped for lack of a pipeline |
-| imagem (image) | 10 | score from comparing against a local reference recording |
+| progress (`progresso`) | 25 | image (10) → Enter accepted (30) → first 3D scene (50) → playable (100) |
+| speed (`velocidade`) | 20 | median FPS in play ÷ 30 |
+| loading (`carregamento`) | 20 | first 3D scene within 60 s = 100; at 20 min = 0 |
+| stability (`estabilidade`) | 15 | 100 minus penalties for drop windows and hitches > 1 s; 0 if the GPU is lost |
+| shaders | 10 | % of draws not dropped for lack of a pipeline |
+| image (`imagem`) | 10 | score from comparing against a local reference recording |
 
-Details, limitations and what to publish: [harness/README.md](harness/README.md#score).
+The FPS-drop check flags a REGRESSION (exit code 1) when a new version loses more than 10% FPS, gets 15% worse at p95, or adds drops, hitches or a lost GPU. Details, limitations and what to publish: [harness/README.md](harness/README.md#score-0100).
 
 ## How the AIs work
 
@@ -52,15 +49,15 @@ Details, limitations and what to publish: [harness/README.md](harness/README.md#
      └──── one PR per attempt: text report + aggregate numbers ───┘
                                │
               periodic consolidation (stronger AI)
-   reads the PRs → builds a local candidate → harness → publishes score
+   reads the PRs → build → run → score → drop check → scoreboard
 ```
 
 ## Where things are
 
 | Path | Contents |
 |---|---|
-| [guia/](guia/README.md) | REA guide for VIctory: environment, build identity, source → PDB → PE, measuring, area map, pitfalls |
-| [harness/](harness/README.md) | Automated test: launcher, watcher with score, log extractor, example configuration |
+| [guia/](guia/README.md) | REA guide for VIctory: environment, build identity, source → PDB → PE, measuring, area map, pitfalls, the automated pipeline |
+| [harness/](harness/README.md) | Automated pipeline: build a version, run it unattended, score it, check for FPS drops, scoreboard |
 | [harness/patches/](harness/patches/README.md) | Runtime diffs the test depends on (`VICTORY_KEYS_FILE`, `VICTORY_TEXTURE_FLOOR_MB`, `VICTORY_DSTORAGE_STATS`, Series S planes) |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Protocol: Issue, assignee, one PR per attempt, evidence tags |
 | [docs/consolidacao.md](docs/consolidacao.md) | The consolidating AI's cycle |
@@ -79,7 +76,7 @@ The same script runs on GitHub Actions for every push and PR. It rejects binarie
 
 ## Note on names
 
-File names and the scripts' parameters (`-Rapido`, `-FecharAposJogavelS`, …) and score keys (`progresso`, `velocidade`, …) are in Portuguese, the language the project started in. They are kept as-is for compatibility with existing runs. Each one is explained in English where it is used.
+File names, the scripts' parameters (`-Fonte`, `-Versao`, `-Perfil`, …), score keys (`progresso`, `velocidade`, …) and work-folder names (`versoes`, `rodadas`, `placar`) are in Portuguese, the language the project started in. They are kept as-is for compatibility with existing runs. Each one is explained in English where it is used.
 
 ## License
 
