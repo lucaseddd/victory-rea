@@ -2,13 +2,13 @@
 # Use single quotes: in TOML they do not treat the backslash as an escape.
 
 # Pipeline work folder, OUTSIDE the repository. The scripts create and use:
-#   versoes\        built versions (vNNN-<name>-<sha8>\ with exe, pdb, D3D12\, manifesto.json)
+#   versions\       built versions (vNNN-<name>-<sha8>\ with exe, pdb, D3D12\, manifest.json)
 #   runtime\        the fixed path every version runs from (one firewall rule for all)
-#   dados-semente\  the starting save, restored into dados\ before every run (you provide it)
-#   dados\          the runtime's data folder during a run
+#   seed-data\      the starting save, restored into data\ before every run (you provide it)
+#   data\           the runtime's data folder during a run
 #   cache\          shared shader/pipeline cache
-#   rodadas\        per-run logs, settings, milestones, samples, score and comparison
-#   placar.csv, placar.md   the scoreboard
+#   runs\           per-run logs, settings, milestones, samples, score and comparison
+#   scoreboard.csv, scoreboard.md
 work_dir = 'D:\victory\pipeline'
 
 # The title's executable, from your own console's dump. It never goes into the repository.

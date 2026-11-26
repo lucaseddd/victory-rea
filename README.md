@@ -1,16 +1,16 @@
-# VIctory REA: reverse-engineering guide and automated scored test
+﻿# VIctory REA: reverse-engineering guide and automated scored test
 
 This repository brings together three pieces for running an Xbox Series title at 30 rendered FPS, with a correct image, on [VIctory](https://github.com/Marvisak/VIctory):
 
-1. **A REA guide.** How to use assisted reverse engineering (source + PDB + PE, with Ghidra and `dumpbin`) to understand the runtime, measure it and propose changes. → [guia/](guia/README.md)
+1. **A REA guide.** How to use assisted reverse engineering (source + PDB + PE, with Ghidra and `dumpbin`) to understand the runtime, measure it and propose changes. → [guide/](guide/README.md)
 2. **An automated test with a score.** A pipeline (build → version → run → score → FPS-drop check → scoreboard) runs with no key presses. It compiles a version, runs the title, presses Enter through the menus, detects the first 3D scene and when the game becomes playable, and closes the game. Each run gets a 0–100 score for progress, speed, loading, stability, shaders and image, and is compared with the previous version to flag FPS regressions. → [harness/](harness/README.md)
 3. **Coordination of several AIs in parallel.** One Issue per task, one area per AI, one PR per attempt, and a stronger AI that consolidates, builds a candidate and runs the test. → [CONTRIBUTING.md](CONTRIBUTING.md)
 
-**Only text goes in here.** The game, executables, raw logs and captures stay on the local machine. See [POLITICA-DE-DADOS.md](POLITICA-DE-DADOS.md) (data policy).
+**Only text goes in here.** The game, executables, raw logs and captures stay on the local machine. See [DATA-POLICY.md](DATA-POLICY.md) (data policy).
 
 ## Quick start
 
-Read the guide: start with [guia/README.md](guia/README.md) and the [area map](guia/05-areas.md).
+Read the guide: start with [guide/README.md](guide/README.md) and the [area map](guide/05-areas.md).
 
 Run the pipeline in PowerShell as administrator, on a VIctory source tree with the [patches](harness/patches/README.md) applied, after the [one-time setup](harness/README.md#one-time-setup):
 
@@ -19,21 +19,21 @@ Copy-Item .\harness\harness.example.toml .\harness\harness.toml
 ```
 
 ```powershell
-.\harness\Pipeline.ps1 -Fonte 'D:\victory\cand4' -Nome 'my-change' -Notas 'what changed'
+.\harness\Pipeline.ps1 -Source 'D:\victory\cand4' -Name 'my-change' -Notes 'what changed'
 ```
 
-Nothing to press: the run ends by itself. The score goes to `<work_dir>\rodadas\<run>.score.md`, and the history goes to `<work_dir>\placar.md`.
+Nothing to press: the run ends by itself. The score goes to `<work_dir>\runs\<run>.score.md`, and the history goes to `<work_dir>\scoreboard.md`.
 
 ## Score
 
 | Component | Weight | Summary |
 |---|---|---|
-| progress (`progresso`) | 25 | image (10) → Enter accepted (30) → first 3D scene (50) → playable (100) |
-| speed (`velocidade`) | 20 | median FPS in play ÷ 30 |
-| loading (`carregamento`) | 20 | first 3D scene within 60 s = 100; at 20 min = 0 |
-| stability (`estabilidade`) | 15 | 100 minus penalties for drop windows and hitches > 1 s; 0 if the GPU is lost |
+| progress (`progress`) | 25 | image (10) → Enter accepted (30) → first 3D scene (50) → playable (100) |
+| speed (`speed`) | 20 | median FPS in play ÷ 30 |
+| loading (`loading`) | 20 | first 3D scene within 60 s = 100; at 20 min = 0 |
+| stability (`stability`) | 15 | 100 minus penalties for drop windows and hitches > 1 s; 0 if the GPU is lost |
 | shaders | 10 | % of draws not dropped for lack of a pipeline |
-| image (`imagem`) | 10 | score from comparing against a local reference recording |
+| image (`image`) | 10 | score from comparing against a local reference recording |
 
 The FPS-drop check flags a REGRESSION (exit code 1) when a new version loses more than 10% FPS, gets 15% worse at p95, or adds drops, hitches or a lost GPU. Details, limitations and what to publish: [harness/README.md](harness/README.md#score-0100).
 
@@ -56,14 +56,14 @@ The FPS-drop check flags a REGRESSION (exit code 1) when a new version loses mor
 
 | Path | Contents |
 |---|---|
-| [guia/](guia/README.md) | REA guide for VIctory: environment, build identity, source → PDB → PE, measuring, area map, pitfalls, the automated pipeline |
+| [guide/](guide/README.md) | REA guide for VIctory: environment, build identity, source → PDB → PE, measuring, area map, pitfalls, the automated pipeline |
 | [harness/](harness/README.md) | Automated pipeline: build a version, run it unattended, score it, check for FPS drops, scoreboard |
 | [harness/patches/](harness/patches/README.md) | Runtime diffs the test depends on (`VICTORY_KEYS_FILE`, `VICTORY_TEXTURE_FLOOR_MB`, `VICTORY_DSTORAGE_STATS`, Series S planes) |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Protocol: Issue, assignee, one PR per attempt, evidence tags |
-| [docs/consolidacao.md](docs/consolidacao.md) | The consolidating AI's cycle |
-| [MAPEAMENTO-REA-COORD.md](MAPEAMENTO-REA-COORD.md) | Proposed mapping from the local `REA-COORD` board to Issues |
-| [tentativas/](tentativas/README.md) | Attempt reports, per task |
-| [POLITICA-DE-DADOS.md](POLITICA-DE-DADOS.md) | What may and may not go in |
+| [docs/consolidation.md](docs/consolidation.md) | The consolidating AI's cycle |
+| [REA-COORD-MAPPING.md](REA-COORD-MAPPING.md) | Proposed mapping from the local `REA-COORD` board to Issues |
+| [attempts/](attempts/README.md) | Attempt reports, per task |
+| [DATA-POLICY.md](DATA-POLICY.md) | What may and may not go in |
 | `.github/` | Issue and PR templates, labels and the automated check |
 
 ## Before every commit
@@ -76,7 +76,7 @@ The same script runs on GitHub Actions for every push and PR. It rejects binarie
 
 ## Note on names
 
-File names, the scripts' parameters (`-Fonte`, `-Versao`, `-Perfil`, …), score keys (`progresso`, `velocidade`, …) and work-folder names (`versoes`, `rodadas`, `placar`) are in Portuguese, the language the project started in. They are kept as-is for compatibility with existing runs. Each one is explained in English where it is used.
+All file names, parameters, score keys, folders and manifest fields are in English. The local board's folder names (`arquivo`, `claims`, `locks`) are kept only where they name real folders on the author's machine.
 
 ## License
 

@@ -1,3 +1,7 @@
+<#
+.SYNOPSIS
+  Extractor: summarizes one or more run logs (world, VRAM, mipmaps, COPY queue, worker, DirectStorage, black frames).
+#>
 [CmdletBinding()]
 param(
     # One or more run .stderr files (wildcards accepted). Only reads the logs.
@@ -19,7 +23,7 @@ foreach ($path in (Resolve-Path $Log)) {
     $back = @($world | ForEach-Object { [double]$_.Matches[0].Groups[5].Value } | Sort-Object)
     $gpu = @($world | ForEach-Object { [double]$_.Matches[0].Groups[4].Value } | Sort-Object)
     $vram = @(Select-String -LiteralPath $f -Pattern "card's own in use at most (\d+) MB, its budget at least (\d+) MB, the PC's shared in use at most (\d+) MB" |
-        ForEach-Object { $g = $_.Matches[0].Groups; [pscustomobject]@{ Uso = [int]$g[1].Value; Orc = [int]$g[2].Value; Comp = [int]$g[3].Value } })
+        ForEach-Object { $g = $_.Matches[0].Groups; [pscustomobject]@{ Used = [int]$g[1].Value; Budget = [int]$g[2].Value; Shared = [int]$g[3].Value } })
     $tiles = Select-String -LiteralPath $f -Pattern 'textures with levels on demand: (\d+) alive .*?, (\d+) MB of the card given to (\d+) levels .*?the pool''s heaps (\d+) MB' | Select-Object -Last 1
     $small = Select-String -LiteralPath $f -Pattern 'small levels on a full card since the start .*' | Select-Object -Last 1
     $q2 = @(Select-String -LiteralPath $f -Pattern 'the copy queues per frame \(VICTORY_QUEUE2=\d+\): fetches of what shaders wrote: ([\d.]+) jobs, ([\d.]+) MB')
@@ -42,8 +46,8 @@ foreach ($path in (Resolve-Path $Log)) {
         $ms.Count, (Get-Pct $ms 50), (Get-Pct $ms 95), (Get-Pct $gpu 50), (Get-Pct $back 50)
     if ($vram.Count) {
         '  VRAM: own max {0} MB; budget min {1} MB; over budget in {2}/{3} lines; shared max {4} MB' -f `
-            ($vram.Uso | Measure-Object -Maximum).Maximum, ($vram.Orc | Measure-Object -Minimum).Minimum,
-            @($vram | Where-Object { $_.Uso -gt $_.Orc }).Count, $vram.Count, ($vram.Comp | Measure-Object -Maximum).Maximum
+            ($vram.Used | Measure-Object -Maximum).Maximum, ($vram.Budget | Measure-Object -Minimum).Minimum,
+            @($vram | Where-Object { $_.Used -gt $_.Budget }).Count, $vram.Count, ($vram.Shared | Measure-Object -Maximum).Maximum
     }
     if ($tiles) {
         $g = $tiles.Matches[0].Groups

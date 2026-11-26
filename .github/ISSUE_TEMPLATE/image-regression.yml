@@ -15,35 +15,35 @@ body:
     validations:
       required: true
   - type: input
-    id: referencia
+    id: reference
     attributes:
       label: Reference build and hash
       placeholder: "victory.exe sha256 84996d18…f563e"
     validations:
       required: true
   - type: input
-    id: cena
+    id: scene
     attributes:
       label: Scene and checkpoint
       placeholder: "C1 cutscene, checkpoint 3"
     validations:
       required: true
   - type: input
-    id: perfil
+    id: mode
     attributes:
       label: Effective profile
-      placeholder: "Controle · VICTORY_TEXTURE_AUTO_VRAM=1 · warm cache"
+      placeholder: "Control · VICTORY_TEXTURE_AUTO_VRAM=1 · warm cache"
     validations:
       required: true
   - type: textarea
-    id: descricao
+    id: description
     attributes:
       label: What you see (in words)
       placeholder: "The 3D scene is fully black; HUD and subtitles show."
     validations:
       required: true
   - type: textarea
-    id: metricas
+    id: metrics
     attributes:
       label: Comparison metrics
       value: |
@@ -55,11 +55,11 @@ body:
     validations:
       required: true
   - type: checkboxes
-    id: regras
+    id: checks
     attributes:
       label: Checks
       options:
-        - label: Every number is tagged [obs-local], [relatado] (reported) or [estimado] (estimated)
+        - label: Every number is tagged [observed], [reported] or [estimated]
           required: true
         - label: No image, video, capture or asset is attached
           required: true

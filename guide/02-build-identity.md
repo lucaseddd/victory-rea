@@ -33,13 +33,13 @@ Publish the GUID and age, but not the PDB path, which may contain folder names f
 Example report line:
 
 ```
-`Host::relay_land` RVA 0x2A8D60 · build victory.exe sha256 D29834AE…378D772 · PDB GUID {59A6A622-…} age 1 [obs-local]
+`Host::relay_land` RVA 0x2A8D60 · build victory.exe sha256 D29834AE…378D772 · PDB GUID {59A6A622-…} age 1 [observed]
 ```
 
 ## Three builds, three maps
 
-The candidates of 2026-11-26 had different hashes, and reports made on the `988aa416` reference did not automatically apply to candidate 1 [relatado]. When reusing a finding from another build:
+The candidates of 2026-11-26 had different hashes, and reports made on the `988aa416` reference did not automatically apply to candidate 1 [reported]. When reusing a finding from another build:
 
 1. Check whether the source file is identical (hash of the `.rs`).
 2. Look the symbol up again in the new build's PDB.
-3. Tag the finding `[relatado]` until it is checked.
+3. Tag the finding `[reported]` until it is checked.

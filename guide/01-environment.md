@@ -7,7 +7,7 @@
   victory-fork-<commit>\         runtime source (fork's git)
   cand<N>\                       copy of the source with candidate N's patches
   cand<N>-dist\victory.exe       built binary (+ victory.pdb, D3D12\)
-  cand<N>-run\                   runs: logs, cache, data, data-semente
+  cand<N>-run\                   runs: logs, cache, data, data-seed
   REA-COORD\evidence\...         raw data for each attempt
 <this repository>\               text only: guide, harness, reports
 ```
@@ -42,7 +42,7 @@ cargo rustc --offline --locked --release --features diagnostics -p victory --bin
 ## Before running
 
 ```powershell
-.\harness\Rodar-Versao.ps1 -Versao ultima -MapOnly
+.\harness\Run-Version.ps1 -Version latest -MapOnly
 ```
 
 `-MapOnly` maps the title without running it, after checking the version's hash and the firewall rules, and reports missing imports. Exit 0 with 0 missing imports is the minimum before asking for the GPU.

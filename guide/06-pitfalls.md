@@ -6,7 +6,7 @@ Mistakes that have happened, or nearly happened, in this project.
 |---|---|
 | An address from one build applied to another | Hash and GUID/age on every claim; look the symbol up again |
 | Whole-run average FPS | Split by draws/frame: menus ~10, 3D scenes > 1,000 |
-| A historical log treated as a baseline | A run without an identified scene or exclusive GPU only gives orientation. Tag it `[relatado]` and say "outside the protocol" |
+| A historical log treated as a baseline | A run without an identified scene or exclusive GPU only gives orientation. Tag it `[reported]` and say "outside the protocol" |
 | An A/B that changes more than one thing | Read in the source what the variable enables. `QUEUE2=1` enables three mechanisms |
 | A black cutscene taken as the "reference" | Compare against a reference recording; use black-frame detection |
 | Slow loading blamed on the GPU | Enable `VICTORY_DSTORAGE_STATS`. On an HDD, the bottleneck was the disk |

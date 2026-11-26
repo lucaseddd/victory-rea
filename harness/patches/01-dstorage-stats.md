@@ -1,6 +1,6 @@
 # VICTORY_DSTORAGE_STATS: DirectStorage counters
 
-Candidate 2. Enabled with `VICTORY_DSTORAGE_STATS=1`. Every 5 s it logs requests per Submit, contiguity (`adjacent_pairs`/`joined_reads`), queue latency, and read, decode and destination time. The launcher enables it by default, and `Medir-Rodada.ps1` summarizes the `dstorage per Submit` lines.
+Candidate 2. Enabled with `VICTORY_DSTORAGE_STATS=1`. Every 5 s it logs requests per Submit, contiguity (`adjacent_pairs`/`joined_reads`), queue latency, and read, decode and destination time. Run-Version.ps1 enables it by default, and `Measure-Run.ps1` summarizes the `dstorage per Submit` lines.
 
 - **Apply in order**, on top of `fxceless/victory-fork` at commit `f6a09d3b` with PR #45 (candidate 1). Hunk line numbers follow that chain.
 - License: VIctory and the fork are GPL-3.0. This diff derives from that code and is under the same license.

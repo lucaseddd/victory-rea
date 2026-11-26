@@ -1,6 +1,6 @@
 # VICTORY_KEYS_FILE: file-driven key presses
 
-Candidate 4, only in builds with `--features diagnostics`. Each time the file's contents change, the runtime holds for 0.2 s the key named by the last word of the last line (same names as `VICTORY_KEYS`). This is what lets `Vigiar-Rodada.ps1` press Enter only while the game is in a menu or loading screen.
+Candidate 4, only in builds with `--features diagnostics`. Each time the file's contents change, the runtime holds for 0.2 s the key named by the last word of the last line (same names as `VICTORY_KEYS`). This is what lets `Watch-Run.ps1` press Enter only while the game is in a menu or loading screen.
 
 - **Apply in order**, on top of `fxceless/victory-fork` at commit `f6a09d3b` with PR #45 (candidate 1). Hunk line numbers follow that chain.
 - License: VIctory and the fork are GPL-3.0. This diff derives from that code and is under the same license.

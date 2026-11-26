@@ -37,12 +37,12 @@ Note: R05 and R09 show the same AI name (Teo) in different sessions. On the Issu
 | `TASKLIST.md` | Becomes Issues #1–#16. The board's rules are already in `CONTRIBUTING.md` |
 | `status\R??.md` | One-line summary in the Issue's **Status** field: state, progress, blocker, next step |
 | `journal\R??\` | Do not migrate the history. From now on, one comment per relevant step |
-| `evidence\R??\<attempt>\` | **Stays local.** Each attempt becomes a PR with `tentativas/R??/<attempt>/relatorio.md`, rewritten with only hashes, offsets/RVAs, VIctory symbol names and aggregate numbers |
+| `evidence\R??\<attempt>\` | **Stays local.** Each attempt becomes a PR with `attempts/R??/<attempt>/report.md`, rewritten with only hashes, offsets/RVAs, VIctory symbol names and aggregate numbers |
 | `claims\R??.json` | Assignee + a `claim: <attempt>` comment |
-| `claims\arquivo\` (OCUP-01, OCUP-02) | Do not become Issues. A comment on #1 records that they were closed at 07:30 |
+| `claims\arquivo\` (local archive folder; OCUP-01, OCUP-02) | Do not become Issues. A comment on #1 records that they were closed at 07:30 |
 | `CONFLITOS.md` | Already resolved. A comment on #1 summarizes it; from now on, the `conflict` label |
 | `locks\gpu-capture.json` | Stays local and atomic. #17 only mirrors it |
-| `REA-INDICE.md` | `docs/indice.md`, edited only by R00 PRs |
+| `REA-INDEX.md` | `docs/index.md`, edited only by R00 PRs |
 
 ## Care when migrating existing attempts
 

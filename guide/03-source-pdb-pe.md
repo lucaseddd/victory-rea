@@ -11,7 +11,7 @@ VIctory is open source and the build ships its PDB. So the reverse engineering h
    - the branch controlled by the variable;
    - the order of operations (who publishes the fence after what).
 4. **Cross-check.** `dumpbin /disasm /range:<start VA>,<end VA> victory.exe` gives a second reading without Ghidra. Record only the address and the name; the listing stays in the local evidence.
-5. **Independent spot-check.** Another AI checks a sample of the claims. On 2026-11-26, R00 confirmed 8 of 8 addresses from R01/R02 in the candidate's PE [relatado].
+5. **Independent spot-check.** Another AI checks a sample of the claims. On 2026-11-26, R00 confirmed 8 of 8 addresses from R01/R02 in the candidate's PE [reported].
 
 ## What becomes publishable text
 
@@ -28,5 +28,5 @@ The `Test-RepoContent` check rejects listings with an address, bytes and a mnemo
 
 - Ask the AI one closed question at a time ("who calls `relay_land`, and with which fence?"), not "analyze the exe".
 - Give it the RVA and the symbol name; it navigates faster and makes fewer mistakes.
-- Require in the answer: address, symbol, the matching source line and the `[obs-local]` tag.
+- Require in the answer: address, symbol, the matching source line and the `[observed]` tag.
 - Be wary of conclusions about the "default" branch that ignore the run's effective configuration (`<log>.settings.txt`).

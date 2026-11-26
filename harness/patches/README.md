@@ -7,10 +7,10 @@ The automated test depends on variables that exist neither in upstream VIctory n
 | # | Patch | Variables | Origin | Needed for |
 |---|---|---|---|---|
 | 01 | [dstorage-stats](01-dstorage-stats.md) | `VICTORY_DSTORAGE_STATS` | local (candidate 2) | the extractor's DirectStorage lines; loading diagnostics |
-| 02 | [texture-floor](02-texture-floor.md) | `VICTORY_TEXTURE_FLOOR_MB`; `VICTORY_TEXTURE_AUTO_VRAM` becomes opt-in | local (candidate 3, R13) | `-PisoTexturasMB`; avoids the black cutscene on 6 GB cards |
-| 03 | [planos-series-s-pr1081](03-planos-series-s-pr1081.md) | `VICTORY_PLANES`, `VICTORY_PLANE_ALPHA` | port of fxceless PR #1081 (head `08ab0418`) | `-Perfil rapido` / `--console series-s` with a visible image |
+| 02 | [texture-floor](02-texture-floor.md) | `VICTORY_TEXTURE_FLOOR_MB`; `VICTORY_TEXTURE_AUTO_VRAM` becomes opt-in | local (candidate 3, R13) | `-Extra @{ VICTORY_TEXTURE_FLOOR_MB = '3072' }`; avoids the black cutscene on 6 GB cards |
+| 03 | [series-s-planes-pr1081](03-series-s-planes-pr1081.md) | `VICTORY_PLANES`, `VICTORY_PLANE_ALPHA` | port of fxceless PR #1081 (head `08ab0418`) | `-Mode quick` / `--console series-s` with a visible image |
 | 04 | [keys-file](04-keys-file.md) | `VICTORY_KEYS_FILE` | local (candidate 4) | the watcher's automatic Enter |
-| 05 | [dstorage-workers](05-dstorage-workers.md) | `VICTORY_DSTORAGE_WORKERS` | local (candidate 4) | `-DiscoWorkers` (optional) |
+| 05 | [dstorage-workers](05-dstorage-workers.md) | `VICTORY_DSTORAGE_WORKERS` | local (candidate 4) | `-DiskWorkers` (optional) |
 | 06 | [small-why](06-small-why.md) | `small levels on a full card` line | local (candidate 2) | mipmap diagnostics (optional) |
 
 ## Building
@@ -23,7 +23,7 @@ cargo rustc --offline --locked --release --features diagnostics -p victory --bin
 - The `D3D12SDKPath`/`D3D12SDKVersion` exports activate the Agility SDK in the `D3D12\` folder next to the exe.
 - Afterwards, run `Get-FileHash victory.exe -Algorithm SHA256` and record the hash in `harness.toml` (`runtime_sha256`).
 
-Reference candidate 4 (2026-11-26, toolchain 1.98.1): `victory.exe` SHA-256 `2FFD8CB5F3E66C16E6CEC8005E778A76692A337FD1075CC3D3CD72991FF41973` [relatado]. Tests: `victory-gpu` 213 ok with 1 old failure (depth bounds, present in every tree), `victory-hle` 108/108 [relatado].
+Reference candidate 4 (2026-11-26, toolchain 1.98.1): `victory.exe` SHA-256 `2FFD8CB5F3E66C16E6CEC8005E778A76692A337FD1075CC3D3CD72991FF41973` [reported]. Tests: `victory-gpu` 213 ok with 1 old failure (depth bounds, present in every tree), `victory-hle` 108/108 [reported].
 
 ## License
 

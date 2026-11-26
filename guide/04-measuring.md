@@ -9,7 +9,7 @@ Every ~5 s the runtime writes an aggregate line to `stderr`, in this format:
 ```
 
 - **draws/frame separates the phases.** About 10 draws is a menu or a loading screen. Above 500–1,000 is a 3D scene (cutscene or world). The watcher uses 50 and 1,000 as thresholds.
-- **A whole-run average misleads.** On candidate 1, the weighted total was 26.7 fps but the world ran at 1.15 fps [relatado, R04]. Always split by phase.
+- **A whole-run average misleads.** On candidate 1, the weighted total was 26.7 fps but the world ran at 1.15 fps [reported, R04]. Always split by phase.
 - **With `VICTORY_FRAME_LOG=1`** the per-frame time is logged too, which is needed for a real p95 and to attribute spikes.
 
 ## Useful counters
@@ -21,7 +21,7 @@ Every ~5 s the runtime writes an aggregate line to `stderr`, in this format:
 | `VICTORY_LOG=info` | own and shared VRAM, DXGI budget, live textures, effective floor |
 | `diagnostics` build | black-frame detection (`a black frame after a frame that was not`) |
 
-[Medir-Rodada.ps1](../harness/Medir-Rodada.ps1) summarizes all of this per run.
+[Measure-Run.ps1](../harness/Measure-Run.ps1) summarizes all of this per run.
 
 ## Comparable protocol
 
@@ -42,7 +42,7 @@ When comparing two configurations:
 
 ## Exclusive GPU
 
-One capture at a time. The reservation is the local file `locks\gpu-capture.json`, created with `[System.IO.File]::Move(temp, destination)`, which fails if the destination exists. Reserve only after confirming that no `victory` process is running or that the user has released the GPU. When done, move the lock to `locks\arquivo\`.
+One capture at a time. The reservation is the local file `locks\gpu-capture.json`, created with `[System.IO.File]::Move(temp, destination)`, which fails if the destination exists. Reserve only after confirming that no `victory` process is running or that the user has released the GPU. When done, move the lock to the local archive folder (`locks\arquivo\`, the board's own folder name).
 
 ## External tools
 

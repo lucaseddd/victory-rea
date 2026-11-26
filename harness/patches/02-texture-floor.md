@@ -1,6 +1,6 @@
 # VICTORY_TEXTURE_FLOOR_MB, and AUTO_VRAM off by default
 
-Candidate 3, the fix for the black cutscene (R13). The VRAM-based texture budget (PR #45) is only enabled with `VICTORY_TEXTURE_AUTO_VRAM=1`. `VICTORY_TEXTURE_FLOOR_MB` sets the floor directly, and a line at the start of the log reports the effective floor. The launcher's `-PisoTexturasMB` uses this patch.
+Candidate 3, the fix for the black cutscene (R13). The VRAM-based texture budget (PR #45) is only enabled with `VICTORY_TEXTURE_AUTO_VRAM=1`. `VICTORY_TEXTURE_FLOOR_MB` sets the floor directly, and a line at the start of the log reports the effective floor. Run-Version.ps1 can set it with `-Extra @{ VICTORY_TEXTURE_FLOOR_MB = '3072' }`.
 
 - **Apply in order**, on top of `fxceless/victory-fork` at commit `f6a09d3b` with PR #45 (candidate 1). Hunk line numbers follow that chain.
 - License: VIctory and the fork are GPL-3.0. This diff derives from that code and is under the same license.
@@ -21,7 +21,7 @@ Candidate 3, the fix for the black cutscene (R13). The VRAM-based texture budget
 +/// on a 6 GB card whose use stands over nine tenths of its budget, the
 +/// quarter-of-the-budget floor held the title's textures at about 1.27 GB
 +/// (2 GiB before), surfaces read zero base colour and the cutscene came out
-+/// black (candidate 1, Controle run of 2026-11-26 07:02, REA-COORD R13).
++/// black (candidate 1, Control run of 2026-11-26 07:02, REA-COORD R13).
  pub(crate) fn texture_auto_vram() -> bool {
      static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
 -    *ON.get_or_init(|| std::env::var_os("VICTORY_TEXTURE_AUTO_VRAM").is_none_or(|v| v != "0"))

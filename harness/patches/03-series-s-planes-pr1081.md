@@ -4,7 +4,7 @@ Candidate 4. With `--console series-s`, the title presents two planes: the game 
 
 - **Apply in order**, on top of `fxceless/victory-fork` at commit `f6a09d3b` with PR #45 (candidate 1). Hunk line numbers follow that chain.
 - License: VIctory and the fork are GPL-3.0. This diff derives from that code and is under the same license.
-- To apply: copy the `diff` block to `03-planos-series-s-pr1081.patch`, run `git apply --check 03-planos-series-s-pr1081.patch`, then `git apply 03-planos-series-s-pr1081.patch`.
+- To apply: copy the `diff` block to `03-series-s-planes-pr1081.patch`, run `git apply --check 03-series-s-planes-pr1081.patch`, then `git apply 03-series-s-planes-pr1081.patch`.
 
 ## `crates/victory-gpu/src/compose.rs`
 

@@ -3,20 +3,20 @@
   Everything in one call: build and version -> unattended run -> score -> FPS-drop check -> scoreboard.
 
 .EXAMPLE
-  .\Pipeline.ps1 -Fonte D:\victory\cand4 -Nome my-change -Notas 'what changed'
+  .\Pipeline.ps1 -Source D:\victory\cand4 -Name my-change -Notes 'what changed'
 #>
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory)][string]$Fonte,       # VIctory source folder
-    [Parameter(Mandatory)][string]$Nome,        # short label for the version
-    [string]$Notas = '',                        # notes for the manifest and the scoreboard
+    [Parameter(Mandatory)][string]$Source,      # VIctory source folder
+    [Parameter(Mandatory)][string]$Name,        # short label for the version
+    [string]$Notes = '',                        # notes for the manifest and the scoreboard
     [string]$Base = '',                         # base commit
-    [ValidateSet('rapido', 'series-x')][string]$Perfil = 'rapido',
+    [ValidateSet('quick', 'series-x')][string]$Mode = 'quick',
     [hashtable]$Extra = @{},                    # extra VICTORY_* settings for the run
-    [switch]$SemTestes,                         # skip the tests
+    [switch]$SkipTests,
     [string]$Config = ''                        # harness.toml (default: next to the scripts)
 )
 
 $ErrorActionPreference = 'Stop'
-$id = & (Join-Path $PSScriptRoot 'Construir-Versao.ps1') -Fonte $Fonte -Nome $Nome -Notas $Notas -Base $Base -SemTestes:$SemTestes -Config $Config | Select-Object -Last 1
-& (Join-Path $PSScriptRoot 'Rodar-Versao.ps1') -Versao $id -Perfil $Perfil -Extra $Extra -Config $Config
+$id = & (Join-Path $PSScriptRoot 'Build-Version.ps1') -Source $Source -Name $Name -Notes $Notes -Base $Base -SkipTests:$SkipTests -Config $Config | Select-Object -Last 1
+& (Join-Path $PSScriptRoot 'Run-Version.ps1') -Version $id -Mode $Mode -Extra $Extra -Config $Config

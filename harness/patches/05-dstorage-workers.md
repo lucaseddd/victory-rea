@@ -1,6 +1,6 @@
 # VICTORY_DSTORAGE_WORKERS: simultaneous disk reads
 
-Candidate 4. `VICTORY_DSTORAGE_WORKERS=1-64` sets how many DirectStorage reads run at once. The default is still one worker per core. The launcher's `-DiscoWorkers` uses this patch. Optional for the score.
+Candidate 4. `VICTORY_DSTORAGE_WORKERS=1-64` sets how many DirectStorage reads run at once. The default is still one worker per core. Run-Version.ps1's `-DiskWorkers` uses this patch. Optional for the score.
 
 - **Apply in order**, on top of `fxceless/victory-fork` at commit `f6a09d3b` with PR #45 (candidate 1). Hunk line numbers follow that chain.
 - License: VIctory and the fork are GPL-3.0. This diff derives from that code and is under the same license.

@@ -1,6 +1,6 @@
 # Contributing
 
-This protocol carries the local `REA-COORD` board (atomic claims, status, journal, evidence and the GPU lock) over to GitHub. Read [POLITICA-DE-DADOS.md](POLITICA-DE-DADOS.md) (data policy) first.
+This protocol carries the local `REA-COORD` board (atomic claims, status, journal, evidence and the GPU lock) over to GitHub. Read [DATA-POLICY.md](DATA-POLICY.md) (data policy) first.
 
 ## Equivalents
 
@@ -10,10 +10,10 @@ This protocol carries the local `REA-COORD` board (atomic claims, status, journa
 | `claims\<ID>.json` (`File.Move` without overwrite) | Issue **assignee** + a `claim:` comment |
 | `status\<ID>.md` | Issue body (Status section), updated only by the holder |
 | `journal\<ID>\` | Issue comments, one per relevant step |
-| `evidence\<ID>\<attempt>\` | A PR with `tentativas/<ID>/<attempt>/relatorio.md` (text only); raw data stays on the machine |
+| `evidence\<ID>\<attempt>\` | A PR with `attempts/<ID>/<attempt>/report.md` (text only); raw data stays on the machine |
 | `locks\gpu-capture.json` | Stays local. The pinned **GPU lock** Issue only mirrors the holder |
 | `CONFLITOS.md` | `conflict` label + a comment on both tasks' Issues |
-| `REA-INDICE.md` (edited only by R00) | `docs/indice.md`, edited only by R00 PRs |
+| `REA-INDEX.md` (edited only by R00) | `docs/index.md`, edited only by R00 PRs |
 
 ## 1. Taking a task (claim)
 
@@ -42,7 +42,7 @@ This protocol carries the local `REA-COORD` board (atomic claims, status, journa
 ## 3. One PR per attempt
 
 - Branch: `r07/vera-01` (task in lower case / name-attempt).
-- File: `tentativas/R07/R07-Vera-01/relatorio.md`, starting from [tentativas/_modelo/relatorio.md](tentativas/_modelo/relatorio.md). You may add small CSVs **of aggregate numbers** and your own scripts (`.py`, `.ps1`).
+- File: `attempts/R07/R07-Vera-01/report.md`, starting from [attempts/_template/report.md](attempts/_template/report.md). You may add small CSVs **of aggregate numbers** and your own scripts (`.py`, `.ps1`).
 - The PR uses the template and references the Issue with `Refs #<n>`. Use `Closes #<n>` only when the task reaches 100%.
 - One attempt = one idea. For another hypothesis, open another attempt (`-02`).
 - The `Test-RepoContent` check must pass.
@@ -53,9 +53,9 @@ Every claim with a number carries one of these tags:
 
 | Tag | Use |
 |---|---|
-| `[obs-local]` | Measured or checked by you on this machine, on this build (hash cited) |
-| `[relatado]` (reported) | Comes from another report, PR or status. Cite the source |
-| `[estimado]` (estimated) | Calculation, model or inference without direct measurement |
+| `[observed]` | Measured or checked by you on this machine, on this build (hash cited) |
+| `[reported]` | Comes from another report, PR or status. Cite the source |
+| `[estimated]` | Calculation, model or inference without direct measurement |
 
 Missing evidence is written as **unavailable**. Do not fill it in with an estimate without the tag.
 
@@ -65,7 +65,7 @@ Every performance number states:
 
 - build: exe and hash (SHA-256 or BLAKE3), and PDB GUID/age when available;
 - scene and checkpoints (e.g. cutscene C1, first mission M1);
-- effective profile (e.g. Controle or Candidato) and the variables that differ;
+- effective profile (e.g. Control or Candidate) and the variables that differ;
 - resolution, scale, graphics preset and cache (cold or warm);
 - metrics: rendered FPS, median, p95, % > 33.33 ms, hitches, typical and peak VRAM;
 - a split of times when available: CPU preparation, waiting, GPU execution, readback, CPU wait, read and fence publication.
@@ -76,6 +76,6 @@ A capture needs the GPU to itself. The reservation is still `locks\gpu-capture.j
 
 ## 7. Consolidation
 
-Only the consolidating AI (R00 or whoever the user designates) merges PRs into a build, runs the [automated test](harness/README.md) and publishes the score. See [docs/consolidacao.md](docs/consolidacao.md). An attempt that changes the runtime may run the same test and include the score in its PR, citing the SHA-256 of `Vigiar-Rodada.ps1`.
+Only the consolidating AI (R00 or whoever the user designates) merges PRs into a build, runs the [automated test](harness/README.md) and publishes the score. See [docs/consolidation.md](docs/consolidation.md). An attempt that changes the runtime may run the same test and include the score in its PR, citing the SHA-256 of `Watch-Run.ps1`.
 
 Changes to the test itself (launcher, watcher, score weights, patches) go in a separate PR with the `coordination` label.

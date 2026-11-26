@@ -1,6 +1,6 @@
 # SMALL_WHY: why small levels on a full card (optional)
 
-Candidate 2, together with the DirectStorage counters. It logs why tiled textures were left with only small levels while the card was full. `Medir-Rodada.ps1` shows the `small levels on a full card` line. Not needed for the score.
+Candidate 2, together with the DirectStorage counters. It logs why tiled textures were left with only small levels while the card was full. `Measure-Run.ps1` shows the `small levels on a full card` line. Not needed for the score.
 
 - **Apply in order**, on top of `fxceless/victory-fork` at commit `f6a09d3b` with PR #45 (candidate 1). Hunk line numbers follow that chain.
 - License: VIctory and the fork are GPL-3.0. This diff derives from that code and is under the same license.

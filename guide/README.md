@@ -4,12 +4,12 @@ REA here means assisted reverse engineering. An AI (or you) reads the VIctory so
 
 | Chapter | Contents |
 |---|---|
-| [1. Environment](01-ambiente.md) | Folders outside the repository, offline firewall, build, Agility SDK, hashes |
-| [2. Build identity](02-identidade.md) | SHA-256, PDB GUID/age, RVA vs VA, making sure you analyze the right binary |
-| [3. Source to PE](03-fonte-pdb-pe.md) | The source → PDB → PE flow with Ghidra and `dumpbin`, and what may be published |
-| [4. Measuring](04-medir.md) | Log lines, `VICTORY_*` counters, the comparable protocol, the GPU lock |
+| [1. Environment](01-environment.md) | Folders outside the repository, offline firewall, build, Agility SDK, hashes |
+| [2. Build identity](02-build-identity.md) | SHA-256, PDB GUID/age, RVA vs VA, making sure you analyze the right binary |
+| [3. Source to PE](03-source-pdb-pe.md) | The source → PDB → PE flow with Ghidra and `dumpbin`, and what may be published |
+| [4. Measuring](04-measuring.md) | Log lines, `VICTORY_*` counters, the comparable protocol, the GPU lock |
 | [5. Area map](05-areas.md) | Per area: symbols, variables and findings already checked on candidate 1 |
-| [6. Pitfalls](06-armadilhas.md) | What has misled earlier analyses |
+| [6. Pitfalls](06-pitfalls.md) | What has misled earlier analyses |
 | [7. The automated pipeline](07-pipeline.md) | build → version → run → score → FPS-drop check → scoreboard |
 | [Harness reference](../harness/README.md) | Setup, parameters, outputs |
 
@@ -20,5 +20,5 @@ REA here means assisted reverse engineering. An AI (or you) reads the VIctory so
 3. **Read the source.** Find the path in the Rust code (`host.rs`, `queue.rs`, …) and the `VICTORY_*` variables that control it.
 4. **Check the PDB and the PE.** Do the symbols exist? Was the function inlined? Is the branch the source suggests actually in the binary with this configuration?
 5. **Measure.** Put the change through the pipeline, with the GPU reserved: build → version → run → score → FPS-drop check → scoreboard. Extract aggregates from the logs.
-6. **Report.** One PR per attempt, text only: offsets, aggregate numbers, the score and drop-check result, and the `[obs-local]`/`[relatado]`/`[estimado]` tags.
+6. **Report.** One PR per attempt, text only: offsets, aggregate numbers, the score and drop-check result, and the `[observed]`/`[reported]`/`[estimated]` tags.
 7. **Consolidate.** The consolidating AI merges attempts into a candidate, runs the pipeline and publishes the scoreboard.

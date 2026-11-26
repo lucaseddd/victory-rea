@@ -3,11 +3,11 @@
 One folder per attempt, opened by a PR:
 
 ```
-tentativas/
+attempts/
   R07/
     R07-Vera-01/
-      relatorio.md          required (start from _modelo/relatorio.md)
-      agregados.csv         optional: aggregate numbers only, < 512 KiB
+      report.md          required (start from _template/report.md)
+      aggregates.csv         optional: aggregate numbers only, < 512 KiB
       extract_metrics.py    optional: your own script
 ```
 

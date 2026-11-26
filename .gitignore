@@ -1,5 +1,5 @@
 # Allowlist: ignore everything and let only text through.
-# See POLITICA-DE-DADOS.md (data policy). Nothing from the game goes in here.
+# See DATA-POLICY.md. Nothing from the game goes in here.
 *
 !*/
 !.gitignore
