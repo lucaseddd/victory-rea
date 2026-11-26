@@ -22,7 +22,7 @@ The score comes from the automated pipeline ([harness/](../harness/README.md#sco
 
 The consolidation report cites the SHA-256 of `Watch-Run.ps1`, so scores from different cycles stay comparable. Alongside the score, also publish:
 
-- the progress of Issues R00–R15;
+- the progress of Issues on the [live task board](../REA-COORD-MAPPING.md);
 - typical and peak VRAM.
 
 These do not count toward the score, but they explain it.

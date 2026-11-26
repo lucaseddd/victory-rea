@@ -6,31 +6,30 @@ This protocol carries the local `REA-COORD` board (atomic claims, status, journa
 
 | Local `REA-COORD` board | GitHub |
 |---|---|
-| `TASKLIST.md` (R00–R15) | One Issue per task, using the **REA task** template |
-| `claims\<ID>.json` (`File.Move` without overwrite) | Issue **assignee** + a `claim:` comment |
+| `TASKLIST.md` (R00–R15) | One long-running Issue per workstream on the [live board](REA-COORD-MAPPING.md) |
+| `claims\<ID>.json` (`File.Move` without overwrite) | Create-only `claim:Rxx` repository label with the attempt in its description, plus an Issue comment |
 | `status\<ID>.md` | Issue body (Status section), updated only by the holder |
 | `journal\<ID>\` | Issue comments, one per relevant step |
 | `evidence\<ID>\<attempt>\` | A PR with `attempts/<ID>/<attempt>/report.md` (text only); raw data stays on the machine |
-| `locks\gpu-capture.json` | Stays local. The pinned **GPU lock** Issue only mirrors the holder |
+| `locks\gpu-capture.json` | Stays local. The pinned [GPU reservation Issue](https://github.com/lucaseddd/victory-rea/issues/17) only mirrors the holder |
 | `CONFLITOS.md` | `conflict` label + a comment on both tasks' Issues |
 | `REA-INDEX.md` (edited only by R00) | `docs/index.md`, edited only by R00 PRs |
 
 ## 1. Taking a task (claim)
 
-1. Open the task's Issue. If it already has an assignee, **do not take it**. An old claim does not authorize taking over the work: only an explicit handover by the holder, or archiving confirmed by the user or by R00.
-2. Assign the Issue to yourself and, in the same minute, comment:
+1. Open the [live board](REA-COORD-MAPPING.md). Pick the highest-priority available Issue whose dependencies allow meaningful work. Check the existing evidence and adjacent scopes. Keep one active workstream per investigator.
+2. Choose an attempt ID unique to this session. Verify any overlap before claiming. Keep build and scope free of machine paths and game data.
+3. Acquire the task with the script, substituting an available Issue, attempt, build and scope.
 
+   ```powershell
+   .\scripts\Claim-Task.ps1 -Issue 18 -Attempt R16-Ada-01 -Build '<runtime commit or SHA-256>' -Scope 'Restore missing terrain geometry and verify the causal fix'
    ```
-   claim: R07-Vera-01
-   build: <exe> sha256 <hash>
-   scope: <one sentence>
-   ```
 
-3. Replace the `status:open` label with `status:in-progress`.
+The GitHub repository label `claim:R16` is the lock. GitHub accepts one label of that name. Always create it without `--force`. The script then attaches it to the Issue, sets `status:in-progress` and posts a claim comment. Use the label description for ownership when multiple IAs share an account. An Issue assignee is optional. Read the repository label if an Issue appears open after an interrupted claim. A process that did not acquire the label has no claim. [GitHub label API](https://docs.github.com/en/rest/issues/labels#create-a-label)
 
-**Races.** GitHub has no atomic assignment like `File.Move`. If two AIs take the same Issue, the oldest `claim:` comment wins. The other one removes its own assignment and comments `claim withdrawn`.
+To claim manually with repository write access, create the same unique `claim:Rxx` label with your attempt and Issue number in its description. Attach it, replace `status:open` and leave a comment with the attempt, build, scope and time. If synchronization fails after creation, the label still holds the reservation. The winner or R00 can repair the Issue. Never delete or edit another claimant's label.
 
-**One account for several AIs.** If every AI uses the same GitHub account, the assignee only says the task is taken. Who holds it is in the `claim:` comment (AI name and attempt).
+A claim can span multiple cycles. Report the verified milestone, next measurable experiment, and the blocker if one exists. A small isolated experiment is one milestone within the workstream. R00 archives or transfers a claim only after explicit handoff or confirmation by the user. For a verified handoff, close the ownership record in comments, update Issue status and delete the old label last if the task is reopening. Keep the old report and start the successor's new attempt. Claim labels on closed Issues may be retained as history; they must be archived before reopening.
 
 ## 2. Working
 
@@ -44,7 +43,7 @@ This protocol carries the local `REA-COORD` board (atomic claims, status, journa
 - Branch: `r07/vera-01` (task in lower case / name-attempt).
 - File: `attempts/R07/R07-Vera-01/report.md`, starting from [attempts/_template/report.md](attempts/_template/report.md). You may add small CSVs **of aggregate numbers** and your own scripts (`.py`, `.ps1`).
 - The PR uses the template and references the Issue with `Refs #<n>`. Use `Closes #<n>` only when the task reaches 100%.
-- One attempt = one idea. For another hypothesis, open another attempt (`-02`).
+- One PR per substantive attempt. Record related experiments as milestones inside the same Issue. Keep each performance change isolated in its tested candidate.
 - The `Test-RepoContent` check must pass.
 
 ## 4. Evidence tags
@@ -72,7 +71,7 @@ Every performance number states:
 
 ## 6. GPU
 
-A capture needs the GPU to itself. The reservation is still `locks\gpu-capture.json` on the machine, with the same atomic `File.Move`, and only after confirming that the previous test has finished or the user has released the GPU. After reserving, comment on the **GPU lock** Issue (`reserved: R04-Davi-01`), and again on release (`released`). The Issue does not replace the local lock.
+A capture needs the GPU to itself. The reservation is still `locks\gpu-capture.json` on the machine, with the same atomic `File.Move`, and only after confirming that the previous test has finished or the user has released the GPU. After reserving, comment on the [GPU reservation Issue](https://github.com/lucaseddd/victory-rea/issues/17) (`reserved: R04-Davi-01`), and again on release (`released`). The Issue does not replace the local lock.
 
 ## 7. Consolidation
 

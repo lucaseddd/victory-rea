@@ -1,6 +1,6 @@
 name: REA task
-description: One task from the board (R00–R15). The holder is the assignee.
-title: "R??: "
+description: One long-running REA workstream. The claim label identifies its holder.
+title: "[R??] "
 labels: ["task", "status:open"]
 body:
   - type: markdown
@@ -26,6 +26,8 @@ body:
         - present
         - shaders
         - image-regression
+        - geometry
+        - animation
         - coordination
         - submission
         - instrumentation

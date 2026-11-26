@@ -1,4 +1,4 @@
-# Proposed labels. Not yet created on GitHub.
+# Shared GitHub Issue labels. Claim labels are created only on acquisition.
 # Required areas
 - { name: readback,          color: "1d76db", description: "GPU→CPU readback and fence publication (R02, R05)" }
 - { name: vram-mips,         color: "5319e7", description: "VRAM, residency, tiles and mipmaps (R07)" }
@@ -6,6 +6,8 @@
 - { name: present,           color: "fbca04", description: "Present, pacing and rendered frames (R12)" }
 - { name: shaders,           color: "d93f0b", description: "Shaders, PSOs and cache (R11)" }
 - { name: image-regression,  color: "b60205", description: "Image regressions (R13)" }
+- { name: geometry,         color: "1d76db", description: "Terrain, visibility and indirect draws" }
+- { name: animation,        color: "1d76db", description: "Facial animation and audio/video synchronization" }
 # Additional areas
 - { name: coordination,      color: "c5def5", description: "Coordination, index, consolidation and the test itself (R00)" }
 - { name: submission,        color: "bfdadc", description: "Submission and start of the next frame (R01)" }
@@ -21,9 +23,11 @@
 - { name: P1, color: "fbca04", description: "Parallel analysis" }
 - { name: P2, color: "0e8a16", description: "Measurement-driven fixes" }
 # Status and control
+- { name: coordination-board, color: "5319e7", description: "Ownership or hardware coordination" }
+- { name: "status:done",     color: "0e8a16", description: "Verified or historical scope complete" }
 - { name: task,                 color: "ededed", description: "Board task Issue" }
 - { name: "status:open",        color: "ededed", description: "No holder" }
-- { name: "status:in-progress", color: "1d76db", description: "Has a holder (assignee + claim: comment)" }
+- { name: "status:in-progress", color: "1d76db", description: "Has a holder (claim label and Issue comment)" }
 - { name: "status:blocked",     color: "d93f0b", description: "Waiting on a dependency, the GPU or the user" }
 - { name: "status:in-review",   color: "fbca04", description: "Ready for verification" }
 - { name: needs-gpu,            color: "000000", description: "Needs the local GPU lock to move forward" }

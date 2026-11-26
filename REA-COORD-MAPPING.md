@@ -1,53 +1,42 @@
-# Mapping REA-COORD to Issues (proposal)
+# GitHub REA board
 
-This is only a proposal. **Nothing has been created on GitHub.** The states below come from the local `status\*.md` files read on 2026-11-26 around 07:48 (UTC-3), and they change quickly. Re-read the local board before creating the Issues.
+The [GitHub Issues](https://github.com/lucaseddd/victory-rea/issues) are the source of truth for task ownership, milestones, blockers, handoffs, and evidence links. The local board is historical for ownership. The local GPU lock remains authoritative for GPU use. See the [ranked research roadmap](docs/roadmap.md) and the [contribution protocol](CONTRIBUTING.md).
 
-## Creation order
+- **Start here** · [R00, coordination](https://github.com/lucaseddd/victory-rea/issues/1).
+- **Find work** · [Open, unclaimed tasks](https://github.com/lucaseddd/victory-rea/issues?q=is%3Aissue%20is%3Aopen%20label%3Atask%20label%3Astatus%3Aopen). Read the Issue and its dependencies before claiming. A repository label named `claim:Rxx` reserves the task, even if the Issue has not yet been updated.
+- **Capture** · [GPU reservation mirror](https://github.com/lucaseddd/victory-rea/issues/17). Get the local lock only after confirming that the previous test ended or the user released the GPU.
+- **Resume** · Local attempts migrated by name. In-progress, blocked and review attempts were reserved on GitHub. Completed historical Issues were closed. Match your attempt name before posting updates. R00 handles ownership disputes and stale attempts.
 
-Created in this order in an empty repository, Issue #1 is R00 and #16 is R15, so each Issue number is the task number plus 1. #17 is the **GPU lock** (pinned).
+| ID | Priority | Issue | Area |
+|---|---|---|---|
+| R00 | P0 | [Coordination, integration and results index](https://github.com/lucaseddd/victory-rea/issues/1) | `coordination` |
+| R01 | P0 | [Submission and next-frame dependency map](https://github.com/lucaseddd/victory-rea/issues/2) | `submission` |
+| R02 | P0 | [Readback and guest fence publication](https://github.com/lucaseddd/victory-rea/issues/3) | `readback` |
+| R03 | P0 | [Correlated instrumentation and short scene trace](https://github.com/lucaseddd/victory-rea/issues/4) | `instrumentation` |
+| R04 | P0 | [Reproducible cutscene and mission baseline](https://github.com/lucaseddd/victory-rea/issues/5) | `baseline` |
+| R05 | P1 | [Isolated COPY queue comparison](https://github.com/lucaseddd/victory-rea/issues/6) | `readback` |
+| R06 | P1 | [Graphics and compute pass map](https://github.com/lucaseddd/victory-rea/issues/7) | `gpu-exec` |
+| R07 | P1 | [VRAM, mipmaps and residency baseline](https://github.com/lucaseddd/victory-rea/issues/8) | `vram-mips` |
+| R08 | P1 | [Texture worker isolation and validation](https://github.com/lucaseddd/victory-rea/issues/9) | `textures` |
+| R09 | P1 | [DirectStorage and storage throughput](https://github.com/lucaseddd/victory-rea/issues/10) | `directstorage` |
+| R10 | P1 | [Guest/host waits, threads and synchronization map](https://github.com/lucaseddd/victory-rea/issues/11) | `threads-sync` |
+| R11 | P0 | [Shader and pipeline-cache baseline](https://github.com/lucaseddd/victory-rea/issues/12) | `shaders` |
+| R12 | P1 | [Present and frame-counter semantics](https://github.com/lucaseddd/victory-rea/issues/13) | `present` |
+| R13 | P0 | [Black-cutscene regression and guardrail](https://github.com/lucaseddd/victory-rea/issues/14) | `image-regression` |
+| R14 | P2 | [Fix the dominant measured frame blocker](https://github.com/lucaseddd/victory-rea/issues/15) | `optimization` |
+| R15 | P2 | [Release qualification at 30 rendered FPS](https://github.com/lucaseddd/victory-rea/issues/16) | `validation` |
+| R16 | P0 | [Restore terrain and missing geometry from culling to draw](https://github.com/lucaseddd/victory-rea/issues/18) | `geometry` |
+| R17 | P0 | [Restore facial animation and audio/video synchronization](https://github.com/lucaseddd/victory-rea/issues/19) | `animation` |
+| R18 | P0 | [Recover render-pass fidelity, depth, lighting and composition](https://github.com/lucaseddd/victory-rea/issues/20) | `image-regression` |
+| R19 | P1 | [Reduce CPU preparation and submission bottlenecks](https://github.com/lucaseddd/victory-rea/issues/21) | `threads-sync` |
+| R20 | P1 | [Fit textures, tiles and residency into the 6 GB working set](https://github.com/lucaseddd/victory-rea/issues/22) | `vram-mips` |
+| R21 | P0 | [Restore world-data coherence and ground contact](https://github.com/lucaseddd/victory-rea/issues/23) | `directstorage` |
+| R22 | P1 | [Recover shader coverage and remove first-use PSO stalls](https://github.com/lucaseddd/victory-rea/issues/24) | `shaders` |
+| R23 | P1 | [Reduce GPU critical-pass cost without changing output](https://github.com/lucaseddd/victory-rea/issues/25) | `gpu-exec` |
+| R24 | P0 | [Build correctness-gated automated scoring and regression runs](https://github.com/lucaseddd/victory-rea/issues/26) | `baseline` |
+| R25 | P1 | [Eliminate device loss and qualify long sessions](https://github.com/lucaseddd/victory-rea/issues/27) | `validation` |
+| R26 | P2 | [Stabilize displayed pacing and input once engine work is measured](https://github.com/lucaseddd/victory-rea/issues/28) | `present` |
+| R27 | P1 | [Evaluate and integrate focused upstream changes](https://github.com/lucaseddd/victory-rea/issues/29) | `coordination` |
+| R28 | P2 | [Extend qualification beyond the opening scene](https://github.com/lucaseddd/victory-rea/issues/30) | `validation` |
 
-## Tasks R00–R15
-
-| Issue | Task | Labels | Local state → label | Progress | Holder (`claim:` comment) | Dependencies |
-|---|---|---|---|---|---|---|
-| #1 | R00 · Coordination and index | `coordination` `P0` | in progress (cycle 1 closed) → `status:in-progress` | 100% of cycle 1 | `R00-Lia-01` | — |
-| #2 | R01 · Submission and start of the next frame | `submission` `P0` | done → closed | 100% | `R01-Caio-01` | — |
-| #3 | R02 · Readback and fence publication | `readback` `P0` | done → closed | 100% | `R02-Beto-01` | — |
-| #4 | R03 · Instrumentation and short capture | `instrumentation` `P0` `needs-gpu` | blocked → `status:blocked` | 75% | `R03-Nina-01` | R01, R02, GPU lock |
-| #5 | R04 · Baseline and visual regression | `baseline` `image-regression` `P0` `needs-gpu` | blocked (needs an elevated PowerShell) → `status:blocked` | 50% | `R04-Davi-01` (holds the GPU lock) | R03, GPU lock |
-| #6 | R05 · Isolated COPY-queue comparison | `readback` `P0` `needs-gpu` | blocked → `status:blocked` | 50% | `R05-Teo-01` | R03, R04, GPU lock |
-| #7 | R06 · Graphics and compute execution | `gpu-exec` `P1` | in progress → `status:in-progress` | 50% | `R06-Iris-01` | R03 to attribute time |
-| #8 | R07 · VRAM, residency and mipmaps | `vram-mips` `P1` | done → closed | 100% | `R07-Vera-01` | — |
-| #9 | R08 · Texture worker | `textures` `P1` `needs-gpu` | blocked → `status:blocked` | 75% | `R08-Ciro-01` | R05 |
-| #10 | R09 · DirectStorage and HDD streaming | `directstorage` `P1` `needs-gpu` | blocked → `status:blocked` | 75% | `R09-Teo-01` | GPU lock |
-| #11 | R10 · Threads, waits and guest/host sync | `threads-sync` `P1` | done → closed | 100% | `R10-Gael-01` | R01, R02 |
-| #12 | R11 · Shaders, PSOs and cache | `shaders` `P1` `needs-gpu` | blocked → `status:blocked` | 75% | `R11-Mila-01` | GPU lock, elevation |
-| #13 | R12 · Present, pacing and rendered frames | `present` `P1` | in review → `status:in-review` | 75% | `R12-Rui-01` | — |
-| #14 | R13 · Isolate image regressions | `image-regression` `P2` `needs-gpu` | fix built, verification pending → `status:in-review` | 75% | `R13-Otto-01` | R04/R05, GPU lock |
-| #15 | R14 · Optimize the largest measured blocker | `optimization` `P2` | unclaimed → `status:open` | 0% | — | R03–R05 + area report |
-| #16 | R15 · Validate the final candidate | `validation` `P2` | unclaimed → `status:open` | 0% | — | R14, or a baseline that meets the goal |
-| #17 | GPU lock (pinned) | `needs-gpu` | mirror of `locks\gpu-capture.json` | — | latest `reserved:`/`released` comment | — |
-
-Note: R05 and R09 show the same AI name (Teo) in different sessions. On the Issue, the attempt (`R05-Teo-01`, `R09-Teo-01`) identifies the holder.
-
-## Other board items
-
-| Local | Proposal |
-|---|---|
-| `TASKLIST.md` | Becomes Issues #1–#16. The board's rules are already in `CONTRIBUTING.md` |
-| `status\R??.md` | One-line summary in the Issue's **Status** field: state, progress, blocker, next step |
-| `journal\R??\` | Do not migrate the history. From now on, one comment per relevant step |
-| `evidence\R??\<attempt>\` | **Stays local.** Each attempt becomes a PR with `attempts/R??/<attempt>/report.md`, rewritten with only hashes, offsets/RVAs, VIctory symbol names and aggregate numbers |
-| `claims\R??.json` | Assignee + a `claim: <attempt>` comment |
-| `claims\arquivo\` (local archive folder; OCUP-01, OCUP-02) | Do not become Issues. A comment on #1 records that they were closed at 07:30 |
-| `CONFLITOS.md` | Already resolved. A comment on #1 summarizes it; from now on, the `conflict` label |
-| `locks\gpu-capture.json` | Stays local and atomic. #17 only mirrors it |
-| `REA-INDEX.md` | `docs/index.md`, edited only by R00 PRs |
-
-## Care when migrating existing attempts
-
-- **Disassembly.** The local reports for R00, R08 and other tasks quote `dumpbin /disasm` and Ghidra output. Only the address and the symbol name go into a PR, never instruction lines.
-- **CSVs.** Check log-sample CSVs before they go in: only aggregate numeric columns, no lines copied from the raw log.
-- **Recordings.** R13's status cites a video recording in a user-profile folder. In the PR, write "local recording of the cutscene" and give only the numbers.
-- **Session IDs.** Do not migrate the AIs' session IDs: the attempt name is enough.
-- **Check.** Run `scripts/Test-RepoContent.ps1` before every PR.
+Issue numbers are permanent links, independent of task IDs. Raw logs, captures, game material, tool databases and local session identifiers stay on the machine. Publish only allowed evidence under the [data policy](DATA-POLICY.md).

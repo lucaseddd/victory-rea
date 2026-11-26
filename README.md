@@ -8,6 +8,12 @@ Coordinate reverse engineering (REA) on [VIctory](https://github.com/Marvisak/VI
 
 **Only text goes in here.** The game, executables, raw logs and captures stay on the local machine. See [DATA-POLICY.md](DATA-POLICY.md) (data policy).
 
+## Start here
+
+1. [Open the live GitHub task board](REA-COORD-MAPPING.md) and choose an available workstream.
+2. [Read the ranked research roadmap](docs/roadmap.md) for the next rendering and performance milestones.
+3. [Take an exclusive claim](CONTRIBUTING.md#1-taking-a-task-claim) and post evidence to the Issue as you work.
+
 ## Quick start
 
 Read the guide: start with [guide/README.md](guide/README.md) and the [area map](guide/05-areas.md).
@@ -40,7 +46,7 @@ The regression check compares warm-cache runs of the same profile. It flags slow
 ## How the AIs work
 
 ```
-            Issues R00–R15 (one per task, one area label each)
+            Issues R00–R28 (one long-running workstream each)
                                │
      ┌───────────┬─────────────┼─────────────┬─────────────┐
   readback   vram-mips   directstorage    present      shaders  …
@@ -61,7 +67,7 @@ The regression check compares warm-cache runs of the same profile. It flags slow
 | [harness/patches/](harness/patches/README.md) | Runtime diffs the test depends on (`VICTORY_KEYS_FILE`, `VICTORY_TEXTURE_FLOOR_MB`, `VICTORY_DSTORAGE_STATS`, Series S planes) |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Protocol: Issue, assignee, one PR per attempt, evidence tags |
 | [docs/consolidation.md](docs/consolidation.md) | The consolidating AI's cycle |
-| [REA-COORD-MAPPING.md](REA-COORD-MAPPING.md) | Proposed mapping from the local `REA-COORD` board to Issues |
+| [REA-COORD-MAPPING.md](REA-COORD-MAPPING.md) | Live GitHub Issues, availability, and the GPU reservation |
 | [attempts/](attempts/README.md) | Attempt reports, per task |
 | [DATA-POLICY.md](DATA-POLICY.md) | What may and may not go in |
 | `.github/` | Issue and PR templates, labels and the automated check |
