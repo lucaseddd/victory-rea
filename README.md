@@ -1,10 +1,10 @@
-﻿# VIctory REA: reverse-engineering guide and automated scored test
+# VIctory REA — Coordinated Reverse Engineering, Automated Tests, and Scoring
 
-This repository brings together three pieces for running an Xbox Series title at 30 rendered FPS, with a correct image, on [VIctory](https://github.com/Marvisak/VIctory):
+Coordinate reverse engineering (REA) on [VIctory](https://github.com/Marvisak/VIctory), test candidate builds automatically, and use a 0–100 score and a scoreboard to see how each build compares with the last. The target is 30 rendered FPS with correct 3D output.
 
-1. **A REA guide.** How to use assisted reverse engineering (source + PDB + PE, with Ghidra and `dumpbin`) to understand the runtime, measure it and propose changes. → [guide/](guide/README.md)
-2. **An automated test with a score.** A pipeline (build → version → run → score → FPS-drop check → scoreboard) runs with no key presses. It compiles a version, runs the title, presses Enter through the menus, pre-warms the disk from earlier runs, detects the first 3D scene, measures it for a fixed time, captures world frames and closes the game. Each run gets a 0–100 score for progress, speed, loading, stability, shaders and image, and is compared with the previous version to flag FPS regressions. → [harness/](harness/README.md)
-3. **Coordination of several AIs in parallel.** One Issue per task, one area per AI, one PR per attempt, and a stronger AI that consolidates, builds a candidate and runs the test. → [CONTRIBUTING.md](CONTRIBUTING.md)
+1. **Coordinate investigations.** Assign one Issue per task, give each AI investigator a defined area, and submit one PR per attempt. A coordinator reviews evidence and selects changes for a candidate build. → [Contribution workflow](CONTRIBUTING.md)
+2. **Investigate and verify.** Follow the REA guide to map behavior from source, PDB, and PE, record reproducible evidence, and propose changes. → [REA guide](guide/README.md)
+3. **Test and score each candidate.** The harness builds and versions the candidate, pre-warms the file cache when prior read lists are available, drives the menus, and measures and samples a 3D scene unattended. It records progress, speed, loading, stability, shaders, and image in the scoreboard, and checks comparable runs for regressions. → [Test harness](harness/README.md)
 
 **Only text goes in here.** The game, executables, raw logs and captures stay on the local machine. See [DATA-POLICY.md](DATA-POLICY.md) (data policy).
 
@@ -33,9 +33,9 @@ Nothing to press: the run ends by itself. The score goes to `<work_dir>\runs\<ru
 | loading (`loading`) | 20 | first 3D scene within 60 s = 100; at 20 min = 0 |
 | stability (`stability`) | 15 | 100 minus penalties for drop windows and hitches > 1 s; 0 if the GPU is lost |
 | shaders | 10 | % of draws not dropped for lack of a pipeline |
-| image (`image`) | 10 | score from comparing against a local reference recording |
+| image (`image`) | 10 | share of captured 3D frames with mean brightness at least 8/255 |
 
-The FPS-drop check flags a REGRESSION (exit code 1) when a new version loses more than 10% FPS, gets 15% worse at p95, or adds drops, hitches or a lost GPU. Details, limitations and what to publish: [harness/README.md](harness/README.md#score-0100).
+The regression check compares warm-cache runs of the same profile. It flags slowdowns in the 3D scene, a lower image score, reduced progress, and stability regressions when they cross the configured thresholds. Details, limitations and what to publish: [harness/README.md](harness/README.md#score-0100).
 
 ## How the AIs work
 

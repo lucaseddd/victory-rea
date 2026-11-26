@@ -20,7 +20,7 @@ Everything runs on your machine. Only numbers (from `*.score.md`, the comparison
 | [Build-Version.ps1](Build-Version.ps1) ("build version") | Release build (diagnostics + Agility exports), runs the `victory-gpu` and `victory-hle` tests, and creates `versions\vNNN-<name>-<sha8>\` with the exe, pdb, `D3D12\` and `manifest.json` |
 | [Run-Version.ps1](Run-Version.ps1) ("run version") | Deploys the version to the fixed `runtime\` path and checks its hash. Then: restores `data\` from `seed-data\`, uses the shared cache, runs the title, calls the watcher, compares the result and updates the scoreboard |
 | [Watch-Run.ps1](Watch-Run.ps1) ("watch run") | Follows the log, drives the menus, records milestones, closes the game and computes the score |
-| [Compare-Runs.ps1](Compare-Runs.ps1) ("compare runs") | **FPS-drop checker** between two runs. Exit code 1 on regression |
+| [Compare-Runs.ps1](Compare-Runs.ps1) ("compare runs") | Compares world performance, image score, stability, and progress. Exit code 1 on regression |
 | [Pipeline.ps1](Pipeline.ps1) | Build + run in one call |
 | [Measure-Run.ps1](Measure-Run.ps1) ("measure run") | Extra extractor: summarizes `.stderr` logs (world, VRAM, mipmaps, COPY queue, worker, DirectStorage, black frames) |
 | [Common.ps1](Common.ps1) | Shared helpers: reads `harness.toml`, refuses a `work_dir` inside the repository, checks firewall rules |
@@ -126,7 +126,7 @@ Compare any two runs:
 | loading (`loading`) | 20 | 100 with the first 3D scene at 60 s; 0 at 20 min; linear in between |
 | stability (`stability`) | 15 | 100 − 2 per % of world windows with a drop (> 2× the median) − 5 per hitch > 1 s; 0 if the GPU is lost |
 | shaders (`shaders`) | 10 | % of world draws not dropped for lack of a pipeline |
-| image (`image`) | 10 | `cutscene-lab/score.py` score against a local reference recording, optional |
+| image (`image`) | 10 | Share of captured 3D frames with mean brightness at least 8/255. Direct watcher calls can supply an explicit `-ImageScore` |
 
 - **Total:** weighted average of the components that have data. A component without data drops out of the average; it does not count as zero.
 - **Weights and limits:** conventions of this test, set in the scripts. If you change them, say so in the PR and cite the SHA-256 of `Watch-Run.ps1`, because scores from different watcher versions are not comparable.
@@ -137,6 +137,7 @@ Compare any two runs:
 
 - median world FPS drops more than 10%;
 - world p95 ms/frame gets more than 15% worse;
+- the image score drops more than 10 points when both runs have an image score;
 - windows with a drop (> 2× the median) rise more than 5 percentage points;
 - there is more than 1 extra hitch > 1 s;
 - the GPU is lost;
