@@ -6,11 +6,12 @@ The pipeline:
 
 1. compiles the source;
 2. gives it a version number;
-3. runs the title unattended and presses Enter in the menus;
-4. detects the first 3D scene and the moment the game becomes playable;
-5. measures, closes the game and computes the score;
-6. compares the run with the previous version and flags FPS drops;
-7. updates the scoreboard.
+3. pre-warms the disk from earlier runs' read lists, so the game's scattered reads hit a warm file cache;
+4. runs the title unattended and presses Enter in the menus;
+5. detects the first 3D scene, measures it for a fixed time, and captures 1 world frame in 64;
+6. closes the game and computes the score;
+7. compares the run with the previous version and flags FPS drops;
+8. updates the scoreboard.
 
 Everything runs on your machine. Only numbers (from `*.score.md`, the comparison and `scoreboard.md`) come back to the repository.
 
@@ -96,7 +97,7 @@ Compare any two runs:
 | | `-Mode quick\|series-x` | `quick` (quick) = `--console series-s` + `VICTORY_DISPLAY_MODE=1280x720`; `series-x` = reference |
 | | `-Extra @{...}` | extra `VICTORY_*` settings |
 | Run-Version | `-DiskWorkers N` | `VICTORY_DSTORAGE_WORKERS` (patch 05) |
-| | `-MeasurePlayableS` | seconds measured after playable (120) |
+| | `-MeasureSceneS` | seconds of 3D scene measured before closing (240) |
 | | `-MaxMinutes` | hard time limit (45) |
 | | `-NoProgressMin` | close after this many minutes without a new milestone (12) |
 | | `-MapOnly` | map without running |
@@ -108,8 +109,8 @@ Compare any two runs:
 - **Automatic Enter** in the menus, only on light screens (up to 50 draws per frame) and before the 3D scene.
 - **Enter accepted:** recorded when the screen changes (the draw count) 3–15 s after an Enter.
 - **First 3D scene:** the first frame with more than 1,000 draws.
-- **Playable:** the first save written after the 3D scene. In candidate 1's run, the mission-start autosave was written ~3 min after the first 3D frame, and no run that stopped in the cutscene wrote a save [reported].
-- **End:** closes the game 120 s after playable, at 45 min, or after 12 min without a new milestone.
+- **Autosave:** written early in the 3D scene, so it is only a milestone. The test does not end there.
+- **End:** closes the game after the measured scene time, at 45 min, or after 12 min without a new milestone.
 - **Outputs:**
   - `.milestones.log` (milestones);
   - `.samples.csv` (samples);
@@ -120,7 +121,7 @@ Compare any two runs:
 
 | Component (key) | Weight | Computation |
 |---|---|---|
-| progress (`progress`) | 25 | 10 = image; 30 = Enter accepted; 50 = first 3D scene; 100 = playable |
+| progress (`progress`) | 25 | 10 = image; 30 = Enter accepted; 50 = first 3D scene; 100 = 3D scene measured without losing the GPU |
 | speed (`speed`) | 20 | median FPS in play (or in the cutscene, if play was not reached) ÷ 30 |
 | loading (`loading`) | 20 | 100 with the first 3D scene at 60 s; 0 at 20 min; linear in between |
 | stability (`stability`) | 15 | 100 − 2 per % of world windows with a drop (> 2× the median) − 5 per hitch > 1 s; 0 if the GPU is lost |
@@ -134,7 +135,7 @@ Compare any two runs:
 
 `Compare-Runs.ps1` flags a **REGRESSION** (exit code 1) if, against the previous version:
 
-- median world or playable FPS drops more than 10%;
+- median world FPS drops more than 10%;
 - world p95 ms/frame gets more than 15% worse;
 - windows with a drop (> 2× the median) rise more than 5 percentage points;
 - there is more than 1 extra hitch > 1 s;

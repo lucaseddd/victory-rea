@@ -12,6 +12,9 @@ The automated test depends on variables that exist neither in upstream VIctory n
 | 04 | [keys-file](04-keys-file.md) | `VICTORY_KEYS_FILE` | local (candidate 4) | the watcher's automatic Enter |
 | 05 | [dstorage-workers](05-dstorage-workers.md) | `VICTORY_DSTORAGE_WORKERS` | local (candidate 4) | `-DiskWorkers` (optional) |
 | 06 | [small-why](06-small-why.md) | `small levels on a full card` line | local (candidate 2) | mipmap diagnostics (optional) |
+| 07 | [fxceless-pr798-title-patches](07-fxceless-pr798-title-patches.md) | per-build `KNOWN_BUILDS` / `CodePatch` table, `VICTORY_TITLE_PATCHES` | port of fxceless PR #798 | Series S scene that comes out black (upscaler choice) on build `b99f876b` |
+| 08 | [capture-and-black-frame-probe](08-capture-and-black-frame-probe.md) | `VICTORY_CAPTURE_MENUS`; black-frame probe on the two-plane path | local (candidate 5) | image score and dark-frame count |
+| 09 | [dstorage-trace](09-dstorage-trace.md) | `VICTORY_DSTORAGE_TRACE` | local (candidate 5) | disk pre-warm (`Pre-Warm.ps1`) |
 
 ## Building
 

@@ -14,6 +14,9 @@ work_dir = 'D:\victory\pipeline'
 # The title's executable, from your own console's dump. It never goes into the repository.
 title_exe = 'D:\dump\title\game.exe'
 
+# The game's package folder (read only, used by Pre-Warm.ps1). Defaults to the folder of title_exe.
+game_dir = 'D:\dump\title'
+
 # Agility SDK binaries (folder with D3D12Core.dll and d3d12SDKLayers.dll), version 1.620.2.
 agility_bin = 'D:\victory\d3d12-agility-1.620.2\build\native\bin\x64'
 

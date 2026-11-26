@@ -27,6 +27,7 @@ function Get-HarnessConfig([string]$Config, [string]$ScriptDir) {
         throw "work_dir ($($c['work_dir'])) is inside the repository. Use a folder outside it."
     }
     if (-not $c['rust_toolchain']) { $c['rust_toolchain'] = '1.98.1' }
+    if (-not $c['game_dir'] -and $c['title_exe']) { $c['game_dir'] = Split-Path -Parent $c['title_exe'] }
     $c
 }
 

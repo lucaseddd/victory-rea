@@ -16,7 +16,7 @@ The REA cycle ends in a number. Every change, from a one-line patch to a new can
  └────────────┘
        │
        ▼
- ┌────────────┐   milestones: first frame → Enter accepted → first 3D scene → playable (first save)
+ ┌────────────┐   milestones: first frame → Enter accepted → first 3D scene → 3D scene measured
  │   score    │── progress 25 · speed 20 · loading 20 · stability 15 · shaders 10 · image 10
  └────────────┘
        │
@@ -34,7 +34,7 @@ The REA cycle ends in a number. Every change, from a one-line patch to a new can
 ## Steps in practice
 
 1. **Build** with `Build-Version.ps1 -Source <source> -Name <label> -Notes <what changed>`. The version id carries the first 8 hex digits of the exe's SHA-256, and the manifest keeps the full hashes, the shader-translator hash and the test results.
-2. **Run** with `Run-Version.ps1 -Version <id>`. Nobody needs to touch the keyboard. The run ends by itself 120 s after the game becomes playable, after 12 min without progress, or at 45 min.
+2. **Run** with `Run-Version.ps1 -Version <id>`. Nobody needs to touch the keyboard. Before the game opens, the pipeline pre-warms the disk from the read lists of the last two runs. The run ends by itself after 240 s of measured 3D scene, after 12 min without progress, or at 45 min.
 3. **Score.** The watcher writes `.score.json` and `.score.md`. A component without data drops out of the average.
 4. **Drop check.** It runs automatically when there is a previous warm-cache run of the same profile. You can also run `Compare-Runs.ps1` by hand on any two runs.
 5. **Scoreboard.** `scoreboard.md` lists every run. That table, not a single run, is the history of the project.

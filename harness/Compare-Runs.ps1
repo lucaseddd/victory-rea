@@ -3,11 +3,12 @@
   FPS-drop checker between two runs (two score.json files of the same mode and console).
 
 .DESCRIPTION
-  Returns an object with the verdict (OK or REGRESSION) and the list of findings, and sets
-  exit code 1 on regression. Only compares what both runs measured. A regression is:
-  median world or playable FPS down more than -FpsDropPct; world p95 ms/frame worse than
-  -P95WorsePct; drop windows (> 2x the median) up more than -DropPoints points; more than
-  -ExtraHitches additional hitches > 1 s; a lost GPU; or the run getting less far (progress).
+  Returns an object with the verdict (OK or REGRESSION) and the findings, and sets exit code 1
+  on regression. Only compares what both runs measured. A regression is:
+  median world FPS down more than -FpsDropPct; world p95 ms/frame worse than -P95WorsePct;
+  image score down more than -ImageDropPts points; drop windows (> 2x the median) up more than
+  -DropPoints points; more than -ExtraHitches additional hitches > 1 s; a lost GPU; or the run
+  getting less far (progress).
 
 .EXAMPLE
   .\Compare-Runs.ps1 -Current new.score.json -Previous old.score.json
@@ -18,6 +19,7 @@ param(
     [Parameter(Mandatory)][string]$Previous,    # score.json of the reference version (same mode and console)
     [double]$FpsDropPct = 10,                   # median world FPS may drop up to this (%)
     [double]$P95WorsePct = 15,                  # world p95 ms may get worse up to this (%)
+    [double]$ImageDropPts = 10,                 # image score may drop up to this (points)
     [double]$DropPoints = 5,                    # % of drop windows may rise up to this (percentage points)
     [int]$ExtraHitches = 1                      # hitches > 1 s may increase up to this
 )
@@ -41,8 +43,10 @@ if ($a.components.progress -lt $b.components.progress) {
 if ($a.gpu_lost -gt $b.gpu_lost) { $regression = $true; $findings.Add("REGRESSION GPU lost: $($b.gpu_lost) -> $($a.gpu_lost)") }
 Test-Worse 'median world FPS' $a.fps.world_median $b.fps.world_median $FpsDropPct -HigherIsBetter
 Test-Worse 'world p95 ms' $a.fps.world_ms_p95 $b.fps.world_ms_p95 $P95WorsePct
-Test-Worse 'median playable FPS' $a.fps.playable_median $b.fps.playable_median $FpsDropPct -HigherIsBetter
 Test-Worse 'time to first 3D scene (s)' $a.times_s.first_3d_scene $b.times_s.first_3d_scene 15
+if ($null -ne $a.components.image -and $null -ne $b.components.image -and $a.components.image -lt $b.components.image - $ImageDropPts) {
+    $regression = $true; $findings.Add("REGRESSION image score: $($b.components.image) -> $($a.components.image) (more dark 3D frames)")
+}
 if ($null -ne $a.world_drops.drop_pct -and $null -ne $b.world_drops.drop_pct) {
     $d = $a.world_drops.drop_pct - $b.world_drops.drop_pct
     $txt = 'drop windows (>2x median): {0}% -> {1}%' -f $b.world_drops.drop_pct, $a.world_drops.drop_pct

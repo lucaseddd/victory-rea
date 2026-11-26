@@ -1,12 +1,13 @@
 <#
 .SYNOPSIS
-  Run step: runs one version unattended, scores it, checks for FPS drops and updates the scoreboard.
+  Run step: pre-warms the disk, runs one version unattended, scores it, checks for FPS drops and updates the scoreboard.
 
 .DESCRIPTION
   Copies the version to work_dir\runtime\ (one fixed path, so one firewall rule covers every
-  version), restores the seed save, starts the title, presses Enter in the menus, records the
-  milestones, closes the game at the end, computes the score, compares it with the previous
-  warm-cache run of the same mode and updates scoreboard.csv / scoreboard.md.
+  version), restores the seed save, pre-warms the disk from earlier runs' read lists, starts the
+  title, presses Enter in the menus, records the milestones and the 3D scene, captures 1 world
+  frame in 64, closes the game at the end, computes the score, compares it with the previous
+  warm-cache run of the same mode, and updates scoreboard.csv / scoreboard.md.
   No key presses are needed. Run in PowerShell as administrator (firewall rules are read).
 
 .EXAMPLE
@@ -16,13 +17,15 @@
 #>
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory)][string]$Version,                   # id under versions\ (or 'latest')
+    [Parameter(Mandatory)][string]$Version,                    # id under versions\ (or 'latest')
     [ValidateSet('quick', 'series-x')][string]$Mode = 'quick', # quick = Series S + 1280x720; series-x = reference
     [int]$DiskWorkers = 0,                                    # VICTORY_DSTORAGE_WORKERS (0 = default)
     [hashtable]$Extra = @{},                                  # extra VICTORY_* settings, e.g. @{ VICTORY_QUEUE2 = '1' }
-    [int]$MeasurePlayableS = 120,                             # seconds measured after "playable", then close
+    [int]$MeasureSceneS = 240,                                # seconds of 3D scene measured before closing
     [int]$MaxMinutes = 45,                                    # hard time limit
     [int]$NoProgressMin = 12,                                 # close after this many minutes without a new milestone
+    [switch]$SkipPreWarm,                                     # do not pre-read the disk from earlier runs
+    [switch]$SkipCapture,                                     # do not save PNGs of 3D frames (no image score)
     [switch]$MapOnly,                                         # map without running
     [string]$Config = ''                                      # harness.toml (default: next to this script)
 )
@@ -32,10 +35,11 @@ $ErrorActionPreference = 'Stop'
 $cfg = Get-HarnessConfig $Config $PSScriptRoot
 $workDir = $cfg['work_dir']
 $titleExe = $cfg['title_exe']
+$gameDir = $cfg['game_dir']
 if (-not $titleExe -or -not (Test-Path -LiteralPath $titleExe -PathType Leaf)) { throw "title_exe in harness.toml does not point to a file" }
 $runtime = Join-Path $workDir 'runtime'
 $runtimeExe = Join-Path $runtime 'victory.exe'
-foreach ($d in 'runtime', 'runs', 'cache') { $p = Join-Path $workDir $d; if (-not (Test-Path -LiteralPath $p)) { New-Item -ItemType Directory -Path $p | Out-Null } }
+foreach ($d in 'runtime', 'runs', 'cache', 'reads') { $p = Join-Path $workDir $d; if (-not (Test-Path -LiteralPath $p)) { New-Item -ItemType Directory -Path $p | Out-Null } }
 
 if ($Version -eq 'latest') { $Version = (Get-ChildItem -LiteralPath "$workDir\versions" -Directory -Filter 'v*' | Sort-Object Name | Select-Object -Last 1).Name }
 $versionDir = Join-Path $workDir "versions\$Version"
@@ -57,6 +61,8 @@ $console = if ($Mode -eq 'quick') { 'series-s' } else { 'series-x' }
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $base = Join-Path $workDir "runs\$Version-$Mode-$stamp"
 $keysFile = "$base.keys.txt"
+$captureDir = "$base-frames"
+$readTrace = Join-Path $workDir "reads\$((Split-Path $base -Leaf)).tsv"
 if (-not $MapOnly) {
     $seed = Join-Path $workDir 'seed-data'
     if (-not (Test-Path -LiteralPath $seed)) { throw "Missing $seed (the starting save)" }
@@ -64,6 +70,14 @@ if (-not $MapOnly) {
     if ($LASTEXITCODE -ge 8) { throw 'Failed to restore the seed save' }
 }
 $warmCache = @(Get-ChildItem -LiteralPath "$workDir\cache\pipelines" -File -ErrorAction SilentlyContinue).Count -gt 0
+
+# Disk pre-warm: the read lists of the last two runs, in file order, into the Windows file cache.
+$preWarm = [pscustomobject]@{ mb = 0; seconds = 0 }
+if (-not $SkipPreWarm -and -not $MapOnly) {
+    $lists = @(Get-ChildItem -LiteralPath (Join-Path $workDir 'reads') -Filter *.tsv | Sort-Object LastWriteTime | Select-Object -Last 2 | ForEach-Object FullName)
+    if ($lists.Count -and $gameDir) { $preWarm = & (Join-Path $PSScriptRoot 'Pre-Warm.ps1') -Trace $lists -GameDir $gameDir | Select-Object -Last 1 }
+    else { Write-Host 'Pre-warm: first run; the read list will be written during this run.' }
+}
 
 $settings = @{
     VICTORY_CACHE_DIR = Join-Path $workDir 'cache'; VICTORY_DATA_DIR = Join-Path $workDir 'data'; VICTORY_LOG = 'info'
@@ -77,7 +91,14 @@ $settings = @{
 }
 if ($Mode -eq 'quick') { $settings.VICTORY_DISPLAY_MODE = '1280x720' }
 if ($DiskWorkers -gt 0) { $settings.VICTORY_DSTORAGE_WORKERS = [string]$DiskWorkers }
-if (-not $MapOnly) { $settings.VICTORY_KEYS_FILE = $keysFile }
+if (-not $MapOnly) {
+    $settings.VICTORY_KEYS_FILE = $keysFile
+    $settings.VICTORY_DSTORAGE_TRACE = $readTrace
+    if (-not $SkipCapture) {
+        $settings.VICTORY_CAPTURE = $captureDir; $settings.VICTORY_CAPTURE_WORLD = '1'
+        $settings.VICTORY_CAPTURE_WORLD_EVERY = '64'; $settings.VICTORY_CAPTURE_MENUS = '0'
+    }
+}
 foreach ($k in $Extra.Keys) { if ($k -notmatch '^VICTORY_[A-Z0-9_]+$') { throw "Invalid Extra key: $k" }; $settings[$k] = [string]$Extra[$k] }
 
 $previous = @{}
@@ -103,7 +124,7 @@ if ($MapOnly) {
 }
 Write-Host "Running $Version ($Mode, $console, $(if ($warmCache) { 'warm' } else { 'cold' }) cache). PID $($proc.Id). Nothing to do: the test ends by itself."
 & (Join-Path $PSScriptRoot 'Watch-Run.ps1') -Stderr "$base.stderr" -ProcessId $proc.Id -OutBase $base -KeysFile $keysFile `
-    -SavesDir (Join-Path $workDir 'data') -MeasurePlayableS $MeasurePlayableS -MaxMinutes $MaxMinutes -NoProgressMin $NoProgressMin
+    -SavesDir (Join-Path $workDir 'data') -CaptureDir $captureDir -MeasureSceneS $MeasureSceneS -MaxMinutes $MaxMinutes -NoProgressMin $NoProgressMin
 
 # Scoreboard and FPS-drop check against the previous run of the same mode (warm cache on both).
 $score = Get-Content -LiteralPath "$base.score.json" -Raw | ConvertFrom-Json
@@ -119,7 +140,8 @@ if ($prior -and $warmCache) {
 [pscustomobject]@{
     when = (Get-Date).ToString('s'); version = $Version; notes = $manifest.notes; mode = $Mode; warm_cache = $warmCache
     score = $score.score_total; progress = $score.components.progress; world_fps = $score.fps.world_median; world_ms_p95 = $score.fps.world_ms_p95
-    first_3d_scene_s = $score.times_s.first_3d_scene; playable_s = $score.times_s.playable; drops_pct = $score.world_drops.drop_pct
+    first_3d_scene_s = $score.times_s.first_3d_scene; prewarm_mb = $preWarm.mb; prewarm_s = $preWarm.seconds
+    image = $score.components.image; dark_frames = "$($score.image.dark)/$($score.image.frames)"; drops_pct = $score.world_drops.drop_pct
     hitches_1s = $score.world_drops.hitches_1s; gpu_lost = $score.gpu_lost
     drop_check = $(if ($cmp) { $cmp.verdict } elseif (-not $warmCache) { 'cold cache (not compared)' } else { 'first run of this mode' })
     compared_with = $(if ($prior) { $prior.version } else { '' }); score_json = "$base.score.json"
@@ -129,9 +151,9 @@ $rows = Import-Csv -LiteralPath $csv
 @(
     '# Version scoreboard'
     ''
-    '| When | Version | Mode | Score | Progress | World FPS | p95 ms | First 3D scene (s) | Playable (s) | Drops % | Hitches > 1 s | Drop check |'
-    '|---|---|---|---|---|---|---|---|---|---|---|---|'
-    ($rows | ForEach-Object { "| $($_.when) | $($_.version) | $($_.mode) | $($_.score) | $($_.progress) | $($_.world_fps) | $($_.world_ms_p95) | $($_.first_3d_scene_s) | $($_.playable_s) | $($_.drops_pct) | $($_.hitches_1s) | $($_.drop_check) $(if ($_.compared_with) { "vs $($_.compared_with)" }) |" })
+    '| When | Version | Mode | Score | Progress | World FPS | p95 ms | First 3D scene (s) | Pre-warm (MB/s) | Image | Dark frames | Drops % | Hitches > 1 s | Drop check |'
+    '|---|---|---|---|---|---|---|---|---|---|---|---|---|---|'
+    ($rows | ForEach-Object { "| $($_.when) | $($_.version) | $($_.mode) | $($_.score) | $($_.progress) | $($_.world_fps) | $($_.world_ms_p95) | $($_.first_3d_scene_s) | $($_.prewarm_mb)/$($_.prewarm_s) | $($_.image) | $($_.dark_frames) | $($_.drops_pct) | $($_.hitches_1s) | $($_.drop_check) $(if ($_.compared_with) { "vs $($_.compared_with)" }) |" })
 ) | Set-Content -LiteralPath (Join-Path $workDir 'scoreboard.md') -Encoding utf8
 Write-Host "Score $($score.score_total). Scoreboard: $(Join-Path $workDir 'scoreboard.md')"
 if ($cmp) { Write-Host "FPS-drop check: $($cmp.verdict)"; $cmp.findings | ForEach-Object { Write-Host "  $_" } }

@@ -3,7 +3,7 @@
 This repository brings together three pieces for running an Xbox Series title at 30 rendered FPS, with a correct image, on [VIctory](https://github.com/Marvisak/VIctory):
 
 1. **A REA guide.** How to use assisted reverse engineering (source + PDB + PE, with Ghidra and `dumpbin`) to understand the runtime, measure it and propose changes. → [guide/](guide/README.md)
-2. **An automated test with a score.** A pipeline (build → version → run → score → FPS-drop check → scoreboard) runs with no key presses. It compiles a version, runs the title, presses Enter through the menus, detects the first 3D scene and when the game becomes playable, and closes the game. Each run gets a 0–100 score for progress, speed, loading, stability, shaders and image, and is compared with the previous version to flag FPS regressions. → [harness/](harness/README.md)
+2. **An automated test with a score.** A pipeline (build → version → run → score → FPS-drop check → scoreboard) runs with no key presses. It compiles a version, runs the title, presses Enter through the menus, pre-warms the disk from earlier runs, detects the first 3D scene, measures it for a fixed time, captures world frames and closes the game. Each run gets a 0–100 score for progress, speed, loading, stability, shaders and image, and is compared with the previous version to flag FPS regressions. → [harness/](harness/README.md)
 3. **Coordination of several AIs in parallel.** One Issue per task, one area per AI, one PR per attempt, and a stronger AI that consolidates, builds a candidate and runs the test. → [CONTRIBUTING.md](CONTRIBUTING.md)
 
 **Only text goes in here.** The game, executables, raw logs and captures stay on the local machine. See [DATA-POLICY.md](DATA-POLICY.md) (data policy).
@@ -28,7 +28,7 @@ Nothing to press: the run ends by itself. The score goes to `<work_dir>\runs\<ru
 
 | Component | Weight | Summary |
 |---|---|---|
-| progress (`progress`) | 25 | image (10) → Enter accepted (30) → first 3D scene (50) → playable (100) |
+| progress (`progress`) | 25 | image (10) → Enter accepted (30) → first 3D scene (50) → 3D scene measured without losing the GPU (100) |
 | speed (`speed`) | 20 | median FPS in play ÷ 30 |
 | loading (`loading`) | 20 | first 3D scene within 60 s = 100; at 20 min = 0 |
 | stability (`stability`) | 15 | 100 minus penalties for drop windows and hitches > 1 s; 0 if the GPU is lost |
