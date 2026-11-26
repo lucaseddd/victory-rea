@@ -1,0 +1,41 @@
+name: checagem-conteudo
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  politica-de-dados:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Arvore atual (extensao, tamanho, binario, hex/base64, disassembly, dados pessoais)
+        shell: pwsh
+        run: ./scripts/Test-RepoContent.ps1
+
+      - name: Commits novos (todo blob introduzido, mesmo se apagado depois)
+        shell: pwsh
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.sha }}
+        run: |
+          if ($env:EVENT -eq 'pull_request') {
+            $range = "$($env:PR_BASE)..$($env:PR_HEAD)"
+          } else {
+            git cat-file -e "$($env:PUSH_BEFORE)^{commit}" 2>$null
+            if ($env:PUSH_BEFORE -match '^0+$' -or $LASTEXITCODE -ne 0) {
+              $range = $env:PUSH_AFTER   # branch nova ou force push: historico inteiro
+            } else {
+              $range = "$($env:PUSH_BEFORE)..$($env:PUSH_AFTER)"
+            }
+          }
+          ./scripts/Test-RepoContent.ps1 -GitRange $range

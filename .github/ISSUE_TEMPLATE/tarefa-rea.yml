@@ -1,0 +1,115 @@
+name: Tarefa REA
+description: Uma tarefa do quadro (R00–R15). O titular é o assignee.
+title: "R??: "
+labels: ["tarefa", "estado:aberta"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Uma Issue por tarefa. Antes de preencher, leia CONTRIBUTING.md e POLITICA-DE-DADOS.md.
+        Nada do jogo entra aqui: só hash/GUID da build, offsets de funções e números agregados.
+  - type: input
+    id: tarefa
+    attributes:
+      label: ID da tarefa
+      placeholder: R07
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área (aplique também a label correspondente)
+      options:
+        - readback
+        - vram-mips
+        - directstorage
+        - present
+        - shaders
+        - image-regression
+        - coordenacao
+        - submissao
+        - instrumentacao
+        - baseline
+        - gpu-exec
+        - texturas
+        - threads-sync
+        - otimizacao
+        - validacao
+    validations:
+      required: true
+  - type: dropdown
+    id: prioridade
+    attributes:
+      label: Prioridade
+      options: ["P0", "P1", "P2"]
+    validations:
+      required: true
+  - type: textarea
+    id: escopo
+    attributes:
+      label: Escopo e critério de pronto
+      description: O que a tarefa entrega e como saber que terminou.
+    validations:
+      required: true
+  - type: input
+    id: build
+    attributes:
+      label: Build e hash
+      description: Executável e SHA-256 (ou BLAKE3); PDB GUID/age se houver.
+      placeholder: "victory.exe sha256 d29834ae…378d772 · PDB GUID {…} age 1"
+    validations:
+      required: true
+  - type: input
+    id: cena
+    attributes:
+      label: Cena e checkpoints
+      placeholder: "C1 cutscene, M1 primeira missão · ou: análise estática"
+    validations:
+      required: true
+  - type: input
+    id: perfil
+    attributes:
+      label: Perfil efetivo
+      description: Perfil, variáveis VICTORY_* que diferem, resolução, escala, cache frio/quente.
+      placeholder: "Controle · VICTORY_QUEUE2=0 · 1080p · cache frio"
+    validations:
+      required: true
+  - type: textarea
+    id: metricas
+    attributes:
+      label: Métricas atuais
+      description: FPS renderizado, mediana, p95, % > 33,33 ms, travamentos, VRAM. Use "indisponível" quando não houver medição.
+      value: |
+        | Métrica | Valor | Marca |
+        |---|---|---|
+        | FPS renderizado | indisponível | |
+        | Mediana ms / p95 ms | indisponível | |
+        | % > 33,33 ms | indisponível | |
+        | VRAM típica / pico MB | indisponível | |
+    validations:
+      required: true
+  - type: input
+    id: dependencias
+    attributes:
+      label: Dependências
+      placeholder: "R03 (protocolo) + lock GPU"
+  - type: textarea
+    id: estado
+    attributes:
+      label: Estado (mantido pelo titular)
+      value: |
+        - Estado: aberta
+        - Progresso: 0%
+        - Bloqueio:
+        - Próximo passo:
+    validations:
+      required: true
+  - type: checkboxes
+    id: regras
+    attributes:
+      label: Conferência
+      options:
+        - label: Todo número está marcado como [obs-local], [relatado] ou [estimado]
+          required: true
+        - label: Não há asset, binário, log bruto, captura, disassembly do título nem dado pessoal nesta Issue
+          required: true

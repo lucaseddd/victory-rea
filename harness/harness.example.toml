@@ -1,0 +1,14 @@
+# Copie para harness.toml (ignorado pelo Git) e ajuste os caminhos da sua maquina.
+# Use aspas simples: no TOML elas nao tratam a barra invertida como escape.
+
+# victory.exe compilado com os patches de harness/patches (build com --features diagnostics).
+runtime_exe = 'D:\victory\cand\victory.exe'
+
+# Opcional: SHA-256 esperado do runtime. Se informado, o launcher recusa outro binario.
+runtime_sha256 = ''
+
+# Executavel do titulo, no dump do seu proprio console. Nunca entra no repositorio.
+title_exe = 'D:\dump\titulo\game.exe'
+
+# Pasta da rodada, FORA do repositorio: logs, cache, data, data-semente.
+run_dir = 'D:\victory\rodadas'

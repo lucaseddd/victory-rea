@@ -1,0 +1,65 @@
+name: Regressão de imagem
+description: Diferença de imagem entre uma candidata e a referência local. Só números, nenhuma imagem.
+title: "Regressão: "
+labels: ["image-regression", "estado:aberta"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Não anexe screenshots nem vídeos. Descreva em palavras e informe a métrica da comparação local.
+  - type: input
+    id: build
+    attributes:
+      label: Build e hash (com regressão)
+      placeholder: "victory.exe sha256 …"
+    validations:
+      required: true
+  - type: input
+    id: referencia
+    attributes:
+      label: Build de referência e hash
+      placeholder: "victory.exe sha256 84996d18…f563e"
+    validations:
+      required: true
+  - type: input
+    id: cena
+    attributes:
+      label: Cena e checkpoint
+      placeholder: "C1 cutscene, checkpoint 3"
+    validations:
+      required: true
+  - type: input
+    id: perfil
+    attributes:
+      label: Perfil efetivo
+      placeholder: "Controle · VICTORY_TEXTURE_AUTO_VRAM=1 · cache quente"
+    validations:
+      required: true
+  - type: textarea
+    id: descricao
+    attributes:
+      label: O que se vê (em palavras)
+      placeholder: "Cena 3D toda preta; HUD e legendas aparecem."
+    validations:
+      required: true
+  - type: textarea
+    id: metricas
+    attributes:
+      label: Métricas da comparação
+      value: |
+        | Métrica | Candidata | Referência | Marca |
+        |---|---|---|---|
+        | Similaridade com a referência (ex.: SSIM) | | | |
+        | % de pixels pretos | | | |
+        | FPS / mediana ms | | | |
+    validations:
+      required: true
+  - type: checkboxes
+    id: regras
+    attributes:
+      label: Conferência
+      options:
+        - label: Todo número está marcado como [obs-local], [relatado] ou [estimado]
+          required: true
+        - label: Nenhuma imagem, vídeo, captura ou asset foi anexado
+          required: true
