@@ -1,4 +1,4 @@
-name: checagem-conteudo
+name: content-check
 
 on:
   push:
@@ -8,18 +8,18 @@ permissions:
   contents: read
 
 jobs:
-  politica-de-dados:
+  data-policy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Arvore atual (extensao, tamanho, binario, hex/base64, disassembly, dados pessoais)
+      - name: Current tree (extension, size, binary, hex/base64, disassembly, personal data)
         shell: pwsh
         run: ./scripts/Test-RepoContent.ps1
 
-      - name: Commits novos (todo blob introduzido, mesmo se apagado depois)
+      - name: New commits (every blob introduced, even if deleted later)
         shell: pwsh
         env:
           EVENT: ${{ github.event_name }}
@@ -33,7 +33,7 @@ jobs:
           } else {
             git cat-file -e "$($env:PUSH_BEFORE)^{commit}" 2>$null
             if ($env:PUSH_BEFORE -match '^0+$' -or $LASTEXITCODE -ne 0) {
-              $range = $env:PUSH_AFTER   # branch nova ou force push: historico inteiro
+              $range = $env:PUSH_AFTER   # new branch or force push: whole history
             } else {
               $range = "$($env:PUSH_BEFORE)..$($env:PUSH_AFTER)"
             }

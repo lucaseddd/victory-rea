@@ -1,8 +1,8 @@
-# 2. Identidade da build
+# 2. Build identity
 
-Um endereço só vale para um binário. Todo relatório começa por estas linhas.
+An address is only valid for one binary. Every report starts with these lines.
 
-## Hash do executável e do PDB
+## Executable and PDB hashes
 
 ```powershell
 Get-FileHash .\victory.exe -Algorithm SHA256
@@ -12,34 +12,34 @@ Get-FileHash .\victory.exe -Algorithm SHA256
 Get-FileHash .\victory.pdb -Algorithm SHA256
 ```
 
-O upstream usa BLAKE3 como identidade de build. Qualquer um dos dois serve, desde que o relatório diga qual.
+Upstream uses BLAKE3 as the build identity. Either works, as long as the report says which one.
 
-## GUID e age do PDB (RSDS)
+## PDB GUID and age (RSDS)
 
-O PE guarda no diretório de debug o registro CodeView (`RSDS`) com GUID, age e caminho do PDB. O par GUID/age liga o exe ao PDB certo.
+The PE stores the CodeView record (`RSDS`) in its debug directory, with the GUID, the age and the PDB path. The GUID/age pair ties the exe to the right PDB.
 
 ```powershell
 dumpbin /headers .\victory.exe | Select-String 'RSDS|Format:'
 ```
 
-Publique o GUID e o age, mas não o caminho do PDB, que pode conter nomes de pasta da máquina.
+Publish the GUID and age, but not the PDB path, which may contain folder names from the machine.
 
-## RVA e VA
+## RVA and VA
 
-- **VA** é o endereço com a base da imagem. No `victory.exe` x64 a base preferida é `0x140000000`, então `VA 0x1402AE4E3` = `RVA 0x2AE4E3`.
-- **RVA** é o deslocamento a partir da base. Prefira RVA no relatório: não muda se a imagem for carregada em outra base.
-- Ghidra mostra VA com a base do PE; `dumpbin /disasm` também. Converta antes de publicar e diga qual dos dois você usou.
+- **VA** is the address including the image base. For the x64 `victory.exe` the preferred base is `0x140000000`, so `VA 0x1402AE4E3` = `RVA 0x2AE4E3`.
+- **RVA** is the offset from the base. Prefer RVAs in reports: they do not change if the image loads at a different base.
+- Ghidra shows VAs with the PE's base, and so does `dumpbin /disasm`. Convert before publishing and say which one you used.
 
-Exemplo de linha de relatório:
+Example report line:
 
 ```
 `Host::relay_land` RVA 0x2A8D60 · build victory.exe sha256 D29834AE…378D772 · PDB GUID {59A6A622-…} age 1 [obs-local]
 ```
 
-## Três builds, três mapas
+## Three builds, three maps
 
-As candidatas de 2026-11-26 tinham hashes diferentes, e os relatórios feitos na referência `988aa416` não valiam automaticamente para a candidata 1 [relatado]. Ao reaproveitar um achado de outra build:
+The candidates of 2026-11-26 had different hashes, and reports made on the `988aa416` reference did not automatically apply to candidate 1 [relatado]. When reusing a finding from another build:
 
-1. Confira se o arquivo-fonte é idêntico (hash do `.rs`).
-2. Procure o símbolo de novo no PDB da build nova.
-3. Marque o achado como `[relatado]` até conferir.
+1. Check whether the source file is identical (hash of the `.rs`).
+2. Look the symbol up again in the new build's PDB.
+3. Tag the finding `[relatado]` until it is checked.

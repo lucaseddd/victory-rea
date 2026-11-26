@@ -1,38 +1,39 @@
-# R?? · <título da tarefa> · tentativa R??-<Nome>-<NN>
+# R?? · <task title> · attempt R??-<Name>-<NN>
 
-- **Issue:** #<n> · **Área:** <label>
+- **Issue:** #<n> · **Area:** <label>
 - **Build:** <exe> sha256 <hash> · PDB GUID <guid> age <n>
-- **Cena e checkpoints:** <C1, M1, ou "análise estática">
-- **Perfil efetivo:** <Controle/Candidato> · variáveis que diferem: <VICTORY_X=0/1>
-- **Resolução, escala, gráficos, cache:** <...> · <frio/quente>
-- **Progresso:** <0/25/50/75/100>%
+- **Scene and checkpoints:** <C1, M1, or "static analysis">
+- **Effective profile:** <Controle/Candidato> · variables that differ: <VICTORY_X=0/1>
+- **Resolution, scale, graphics, cache:** <...> · <cold/warm>
+- **Progress:** <0/25/50/75/100>%
 
-## Resultado em uma linha
+## One-line result
 
-<o que mudou no entendimento ou na build>
+<what changed in our understanding or in the build>
 
-## Achados
+## Findings
 
-1. <achado> [obs-local] — `símbolo` RVA `0x...`
-2. <achado> [relatado: fonte]
-3. <achado> [estimado: como]
+1. <finding> [obs-local] — `symbol` RVA `0x...`
+2. <finding> [relatado: source]
+3. <finding> [estimado: how]
 
-## Métricas
+## Metrics
 
-| Métrica | Valor | Marca |
+| Metric | Value | Tag |
 |---|---|---|
-| FPS renderizado | | |
-| Mediana ms / p95 ms | | |
-| % > 33,33 ms | | |
-| Travamentos | | |
-| VRAM típica / pico MB | | |
+| Rendered FPS | | |
+| Median ms / p95 ms | | |
+| % > 33.33 ms | | |
+| Hitches | | |
+| Typical / peak VRAM MB | | |
+| Score (if the harness was run) | | |
 
-Escreva **indisponível** quando não houver medição.
+Write **unavailable** when there is no measurement.
 
-## Como reproduzir
+## How to reproduce
 
-<launcher, parâmetros, variáveis, cena; caminho da evidência local relativo ao workspace>
+<launcher, parameters, variables, scene; path to the local evidence relative to the workspace>
 
-## Hipóteses abertas e próximo passo
+## Open hypotheses and next step
 
 - <...>

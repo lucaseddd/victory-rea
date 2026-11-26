@@ -1,10 +1,10 @@
-# VICTORY_DSTORAGE_WORKERS: leituras simultâneas no disco
+# VICTORY_DSTORAGE_WORKERS: simultaneous disk reads
 
-Candidata 4. `VICTORY_DSTORAGE_WORKERS=1-64` define quantas leituras do DirectStorage correm ao mesmo tempo. O padrão continua um worker por núcleo. O `-DiscoWorkers` do launcher usa esse patch. É opcional para o score.
+Candidate 4. `VICTORY_DSTORAGE_WORKERS=1-64` sets how many DirectStorage reads run at once. The default is still one worker per core. The launcher's `-DiscoWorkers` uses this patch. Optional for the score.
 
-- **Aplicar em ordem**, sobre `fxceless/victory-fork` no commit `f6a09d3b` com o PR #45 (candidata 1). Os números de linha dos hunks seguem essa cadeia.
-- Licença: o VIctory e o fork são GPL-3.0. Este diff é derivado desse código e segue a mesma licença.
-- Para aplicar: copie o bloco `diff` para `05-dstorage-workers.patch` e rode `git apply --check 05-dstorage-workers.patch`, depois `git apply 05-dstorage-workers.patch`.
+- **Apply in order**, on top of `fxceless/victory-fork` at commit `f6a09d3b` with PR #45 (candidate 1). Hunk line numbers follow that chain.
+- License: VIctory and the fork are GPL-3.0. This diff derives from that code and is under the same license.
+- To apply: copy the `diff` block to `05-dstorage-workers.patch`, run `git apply --check 05-dstorage-workers.patch`, then `git apply 05-dstorage-workers.patch`.
 
 ## `crates/victory-hle/src/modules/dstorage.rs`
 

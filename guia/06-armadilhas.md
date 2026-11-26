@@ -1,22 +1,22 @@
-# 6. Armadilhas
+# 6. Pitfalls
 
-Erros que já aconteceram ou quase aconteceram neste projeto.
+Mistakes that have happened, or nearly happened, in this project.
 
-| Armadilha | Como evitar |
+| Pitfall | How to avoid it |
 |---|---|
-| Endereço de uma build aplicado a outra | Hash e GUID/age em toda afirmação; refaça a busca do símbolo |
-| FPS médio da rodada inteira | Separe por draws/quadro: menu ~10, cena 3D > 1.000 |
-| Log histórico tratado como baseline | Rodada sem cena identificada nem GPU exclusiva só orienta. Marque `[relatado]` e diga "fora de protocolo" |
-| A/B que muda mais de uma coisa | Leia o que a variável liga no fonte. `QUEUE2=1` liga três mecanismos |
-| Cutscene preta tomada como "referência" | Compare com uma gravação de referência; use a detecção de quadro preto |
-| Loading lento atribuído à GPU | Ligue `VICTORY_DSTORAGE_STATS`. Num HD, o gargalo foi o disco |
-| Janela menor para "acelerar" | Não muda a leitura do disco. A redução real vem do perfil Series S |
-| `VICTORY_DISPLAY_MODE` para baixar a resolução | O jogo ignora o modo informado (medido no fork) |
-| Series S com imagem preta | Falta o patch 03 (composição dos dois planos) |
-| Launcher falha com "Acesso negado" | Ler regras de firewall exige administrador. Rode elevado; não desligue a checagem |
-| PresentMon "access denied" | Administrador ou grupo Performance Log Users |
-| Dois chats na mesma GPU | Lock local atômico; confira que nenhum `victory` está rodando |
-| Claim antigo "abandonado" | Só repasse explícito do titular ou arquivamento confirmado pelo usuário |
-| Disco externo que anuncia mais do que tem | Não grave dados de teste nele; gravar além da capacidade real corrompe sem aviso |
-| Cache de shaders frio contaminando o FPS | Informe frio/quente; reaproveite o cache só com tradutor idêntico (hash) |
-| Material do jogo num commit | `Test-RepoContent.ps1` antes de cada PR. Se escapar, reescreva o histórico |
+| An address from one build applied to another | Hash and GUID/age on every claim; look the symbol up again |
+| Whole-run average FPS | Split by draws/frame: menus ~10, 3D scenes > 1,000 |
+| A historical log treated as a baseline | A run without an identified scene or exclusive GPU only gives orientation. Tag it `[relatado]` and say "outside the protocol" |
+| An A/B that changes more than one thing | Read in the source what the variable enables. `QUEUE2=1` enables three mechanisms |
+| A black cutscene taken as the "reference" | Compare against a reference recording; use black-frame detection |
+| Slow loading blamed on the GPU | Enable `VICTORY_DSTORAGE_STATS`. On an HDD, the bottleneck was the disk |
+| A smaller window to "speed things up" | It does not change disk reads. The real reduction comes from the Series S profile |
+| `VICTORY_DISPLAY_MODE` to lower the resolution | The game ignores the reported mode (measured on the fork) |
+| Series S with a black image | Patch 03 (two-plane composition) is missing |
+| Launcher fails with "Access denied" | Reading firewall rules requires administrator rights. Run elevated; do not disable the check |
+| PresentMon "access denied" | Administrator or the Performance Log Users group |
+| Two chats on the same GPU | Local atomic lock; confirm no `victory` process is running |
+| An "abandoned" old claim | Only an explicit handover by the holder or archiving confirmed by the user |
+| An external drive that reports more capacity than it has | Do not store test data on it; writing past its real capacity corrupts data silently |
+| A cold shader cache skewing FPS | Report cold/warm; reuse the cache only with an identical translator (hash) |
+| Game material in a commit | Run `Test-RepoContent.ps1` before every PR. If something slips through, rewrite history |

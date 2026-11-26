@@ -1,30 +1,30 @@
-# Labels propostas. Ainda não criadas no GitHub.
-# Áreas obrigatórias
-- { name: readback,          color: "1d76db", description: "Readback GPU→CPU e publicação da fence (R02, R05)" }
-- { name: vram-mips,         color: "5319e7", description: "VRAM, residência, tiles e mipmaps (R07)" }
-- { name: directstorage,     color: "0e8a16", description: "DirectStorage e streaming no disco (R09)" }
-- { name: present,           color: "fbca04", description: "Present, pacing e quadros renderizados (R12)" }
-- { name: shaders,           color: "d93f0b", description: "Shaders, PSOs e cache (R11)" }
-- { name: image-regression,  color: "b60205", description: "Regressões de imagem (R13)" }
-# Áreas complementares
-- { name: coordenacao,       color: "c5def5", description: "Coordenação, índice e consolidação (R00)" }
-- { name: submissao,         color: "bfdadc", description: "Submissão e início do próximo quadro (R01)" }
-- { name: instrumentacao,    color: "bfd4f2", description: "QPC, timestamps de GPU e captura curta (R03)" }
-- { name: baseline,          color: "d4c5f9", description: "Baseline de desempenho e imagem (R04)" }
-- { name: gpu-exec,          color: "fef2c0", description: "Execução gráfica, compute e barreiras (R06)" }
-- { name: texturas,          color: "c2e0c6", description: "Worker e upload de texturas (R08)" }
-- { name: threads-sync,      color: "e99695", description: "Threads, esperas e sincronização guest/host (R10)" }
-- { name: otimizacao,        color: "f9d0c4", description: "Otimização guiada por medição (R14)" }
-- { name: validacao,         color: "0052cc", description: "Validação da candidata final (R15)" }
-# Prioridade
-- { name: P0, color: "b60205", description: "Caminho crítico e medição" }
-- { name: P1, color: "fbca04", description: "Análise em paralelo" }
-- { name: P2, color: "0e8a16", description: "Correções guiadas por medição" }
-# Estado e controle
-- { name: tarefa,              color: "ededed", description: "Issue de tarefa do quadro" }
-- { name: "estado:aberta",       color: "ededed", description: "Sem titular" }
-- { name: "estado:em-andamento", color: "1d76db", description: "Com titular (assignee + comentário claim:)" }
-- { name: "estado:bloqueada",    color: "d93f0b", description: "Esperando dependência, GPU ou usuário" }
-- { name: "estado:em-revisao",   color: "fbca04", description: "Pronta para conferência" }
-- { name: precisa-gpu,         color: "000000", description: "Precisa do lock local da GPU para avançar" }
-- { name: conflito,            color: "b60205", description: "Sobreposição com outra tarefa" }
+# Proposed labels. Not yet created on GitHub.
+# Required areas
+- { name: readback,          color: "1d76db", description: "GPU→CPU readback and fence publication (R02, R05)" }
+- { name: vram-mips,         color: "5319e7", description: "VRAM, residency, tiles and mipmaps (R07)" }
+- { name: directstorage,     color: "0e8a16", description: "DirectStorage and disk streaming (R09)" }
+- { name: present,           color: "fbca04", description: "Present, pacing and rendered frames (R12)" }
+- { name: shaders,           color: "d93f0b", description: "Shaders, PSOs and cache (R11)" }
+- { name: image-regression,  color: "b60205", description: "Image regressions (R13)" }
+# Additional areas
+- { name: coordination,      color: "c5def5", description: "Coordination, index, consolidation and the test itself (R00)" }
+- { name: submission,        color: "bfdadc", description: "Submission and start of the next frame (R01)" }
+- { name: instrumentation,   color: "bfd4f2", description: "QPC, GPU timestamps and short capture (R03)" }
+- { name: baseline,          color: "d4c5f9", description: "Performance and image baseline (R04)" }
+- { name: gpu-exec,          color: "fef2c0", description: "Graphics and compute execution, barriers (R06)" }
+- { name: textures,          color: "c2e0c6", description: "Texture worker and uploads (R08)" }
+- { name: threads-sync,      color: "e99695", description: "Threads, waits and guest/host sync (R10)" }
+- { name: optimization,      color: "f9d0c4", description: "Measurement-driven optimization (R14)" }
+- { name: validation,        color: "0052cc", description: "Final candidate validation (R15)" }
+# Priority
+- { name: P0, color: "b60205", description: "Critical path and measurement" }
+- { name: P1, color: "fbca04", description: "Parallel analysis" }
+- { name: P2, color: "0e8a16", description: "Measurement-driven fixes" }
+# Status and control
+- { name: task,                 color: "ededed", description: "Board task Issue" }
+- { name: "status:open",        color: "ededed", description: "No holder" }
+- { name: "status:in-progress", color: "1d76db", description: "Has a holder (assignee + claim: comment)" }
+- { name: "status:blocked",     color: "d93f0b", description: "Waiting on a dependency, the GPU or the user" }
+- { name: "status:in-review",   color: "fbca04", description: "Ready for verification" }
+- { name: needs-gpu,            color: "000000", description: "Needs the local GPU lock to move forward" }
+- { name: conflict,             color: "b60205", description: "Overlaps with another task" }

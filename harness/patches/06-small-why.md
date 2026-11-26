@@ -1,10 +1,10 @@
-# SMALL_WHY: motivo dos níveis pequenos com a placa cheia (opcional)
+# SMALL_WHY: why small levels on a full card (optional)
 
-Candidata 2, junto dos contadores de DirectStorage. Registra por que texturas tiled ficaram só com níveis pequenos quando a placa estava cheia. O `Medir-Rodada.ps1` mostra a linha `small levels on a full card`. Não é necessário para o score.
+Candidate 2, together with the DirectStorage counters. It logs why tiled textures were left with only small levels while the card was full. `Medir-Rodada.ps1` shows the `small levels on a full card` line. Not needed for the score.
 
-- **Aplicar em ordem**, sobre `fxceless/victory-fork` no commit `f6a09d3b` com o PR #45 (candidata 1). Os números de linha dos hunks seguem essa cadeia.
-- Licença: o VIctory e o fork são GPL-3.0. Este diff é derivado desse código e segue a mesma licença.
-- Para aplicar: copie o bloco `diff` para `06-small-why.patch` e rode `git apply --check 06-small-why.patch`, depois `git apply 06-small-why.patch`.
+- **Apply in order**, on top of `fxceless/victory-fork` at commit `f6a09d3b` with PR #45 (candidate 1). Hunk line numbers follow that chain.
+- License: VIctory and the fork are GPL-3.0. This diff derives from that code and is under the same license.
+- To apply: copy the `diff` block to `06-small-why.patch`, run `git apply --check 06-small-why.patch`, then `git apply 06-small-why.patch`.
 
 ## `crates/victory-gpu/src/tiles.rs`
 

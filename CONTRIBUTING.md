@@ -1,81 +1,81 @@
-# Como contribuir
+# Contributing
 
-Este protocolo traduz para o GitHub o quadro local `REA-COORD` (claims atômicos, status, journal, evidence e lock da GPU). Leia antes [POLITICA-DE-DADOS.md](POLITICA-DE-DADOS.md).
+This protocol carries the local `REA-COORD` board (atomic claims, status, journal, evidence and the GPU lock) over to GitHub. Read [POLITICA-DE-DADOS.md](POLITICA-DE-DADOS.md) (data policy) first.
 
-## Equivalências
+## Equivalents
 
-| Quadro local `REA-COORD` | GitHub |
+| Local `REA-COORD` board | GitHub |
 |---|---|
-| `TASKLIST.md` (R00–R15) | Uma Issue por tarefa, com o template **Tarefa REA** |
-| `claims\<ID>.json` (`File.Move` sem substituição) | **Assignee** da Issue + comentário `claim:` |
-| `status\<ID>.md` | Corpo da Issue (seção Estado), atualizado só pelo titular |
-| `journal\<ID>\` | Comentários da Issue, um por passo relevante |
-| `evidence\<ID>\<tentativa>\` | PR com `tentativas/<ID>/<tentativa>/relatorio.md` (só texto); os dados brutos ficam na máquina |
-| `locks\gpu-capture.json` | Continua local. A Issue fixada **Lock GPU** só espelha o titular |
-| `CONFLITOS.md` | Label `conflito` + comentário na Issue das duas tarefas |
-| `REA-INDICE.md` (só R00 edita) | `docs/indice.md`, editado só por PRs de R00 |
+| `TASKLIST.md` (R00–R15) | One Issue per task, using the **REA task** template |
+| `claims\<ID>.json` (`File.Move` without overwrite) | Issue **assignee** + a `claim:` comment |
+| `status\<ID>.md` | Issue body (Status section), updated only by the holder |
+| `journal\<ID>\` | Issue comments, one per relevant step |
+| `evidence\<ID>\<attempt>\` | A PR with `tentativas/<ID>/<attempt>/relatorio.md` (text only); raw data stays on the machine |
+| `locks\gpu-capture.json` | Stays local. The pinned **GPU lock** Issue only mirrors the holder |
+| `CONFLITOS.md` | `conflict` label + a comment on both tasks' Issues |
+| `REA-INDICE.md` (edited only by R00) | `docs/indice.md`, edited only by R00 PRs |
 
-## 1. Pegar uma tarefa (claim)
+## 1. Taking a task (claim)
 
-1. Abra a Issue da tarefa. Se ela já tem assignee, **não pegue**. Um claim antigo não autoriza tomar o trabalho: só um repasse explícito do titular, ou um arquivamento confirmado pelo usuário ou por R00.
-2. Atribua a Issue a você (assignee) e, no mesmo minuto, comente:
+1. Open the task's Issue. If it already has an assignee, **do not take it**. An old claim does not authorize taking over the work: only an explicit handover by the holder, or archiving confirmed by the user or by R00.
+2. Assign the Issue to yourself and, in the same minute, comment:
 
    ```
    claim: R07-Vera-01
    build: <exe> sha256 <hash>
-   escopo: <uma frase>
+   scope: <one sentence>
    ```
 
-3. Troque a label `estado:aberta` por `estado:em-andamento`.
+3. Replace the `status:open` label with `status:in-progress`.
 
-**Disputa.** O GitHub não tem atribuição atômica como o `File.Move`. Se duas IAs pegarem a mesma Issue, vale o comentário `claim:` mais antigo. A outra remove o próprio assignee e comenta `claim retirado`.
+**Races.** GitHub has no atomic assignment like `File.Move`. If two AIs take the same Issue, the oldest `claim:` comment wins. The other one removes its own assignment and comments `claim withdrawn`.
 
-**Uma conta para várias IAs.** Se todas as IAs usam a mesma conta do GitHub, o assignee só diz que a tarefa está ocupada. Quem é o titular fica no comentário `claim:` (nome da IA e tentativa).
+**One account for several AIs.** If every AI uses the same GitHub account, the assignee only says the task is taken. Who holds it is in the `claim:` comment (AI name and attempt).
 
-## 2. Trabalhar
+## 2. Working
 
-- Fique na área da label. Achou algo de outra área? Comente na Issue dela e não edite o trabalho dela.
-- Registre os passos relevantes como comentários (o antigo `journal`).
-- Mantenha a seção Estado do corpo da Issue com estado, progresso, bloqueio e próximo passo.
-- Progresso: 0% claim · 25% artefatos conferidos · 50% primeira evidência interpretada · 75% análise ou captura concluída, verificação pendente · 100% conferido e reproduzível.
+- Stay in your label's area. Found something in another area? Comment on that area's Issue and do not edit its work.
+- Record relevant steps as comments (the old `journal`).
+- Keep the Status section of the Issue body current: status, progress, blocker, next step.
+- Progress: 0% claimed · 25% artifacts checked · 50% first evidence interpreted · 75% analysis or capture done, verification pending · 100% verified and reproducible.
 
-## 3. Uma PR por tentativa
+## 3. One PR per attempt
 
-- Branch: `r07/vera-01` (tarefa em minúsculas / nome-tentativa).
-- Arquivo: `tentativas/R07/R07-Vera-01/relatorio.md`, a partir de [tentativas/_modelo/relatorio.md](tentativas/_modelo/relatorio.md). Pode juntar CSVs pequenos **de números agregados** e scripts próprios (`.py`, `.ps1`).
-- O PR usa o template e cita a Issue com `Refs #<n>`. Use `Closes #<n>` só quando a tarefa chegar a 100%.
-- Uma tentativa = uma ideia. Para outra hipótese, abra outra tentativa (`-02`).
-- A checagem `Test-RepoContent` precisa passar.
+- Branch: `r07/vera-01` (task in lower case / name-attempt).
+- File: `tentativas/R07/R07-Vera-01/relatorio.md`, starting from [tentativas/_modelo/relatorio.md](tentativas/_modelo/relatorio.md). You may add small CSVs **of aggregate numbers** and your own scripts (`.py`, `.ps1`).
+- The PR uses the template and references the Issue with `Refs #<n>`. Use `Closes #<n>` only when the task reaches 100%.
+- One attempt = one idea. For another hypothesis, open another attempt (`-02`).
+- The `Test-RepoContent` check must pass.
 
-## 4. Marcação de evidência
+## 4. Evidence tags
 
-Toda afirmação com número leva uma destas marcas:
+Every claim with a number carries one of these tags:
 
-| Marca | Uso |
+| Tag | Use |
 |---|---|
-| `[obs-local]` | Medido ou conferido por você nesta máquina, nesta build (hash citado) |
-| `[relatado]` | Vem de outro relatório, PR ou status. Cite a fonte |
-| `[estimado]` | Cálculo, modelo ou inferência sem medição direta |
+| `[obs-local]` | Measured or checked by you on this machine, on this build (hash cited) |
+| `[relatado]` (reported) | Comes from another report, PR or status. Cite the source |
+| `[estimado]` (estimated) | Calculation, model or inference without direct measurement |
 
-Evidência ausente se escreve **indisponível**. Não preencha com estimativa sem a marca.
+Missing evidence is written as **unavailable**. Do not fill it in with an estimate without the tag.
 
-## 5. Protocolo de resultados comparáveis
+## 5. Comparable-results protocol
 
-Todo número de desempenho informa:
+Every performance number states:
 
-- build: exe e hash (SHA-256 ou BLAKE3), e PDB GUID/age quando houver;
-- cena e checkpoints (ex.: cutscene C1, primeira missão M1);
-- perfil efetivo (ex.: Controle ou Candidato) e as variáveis que diferem;
-- resolução, escala, preset gráfico e cache (frio ou quente);
-- métricas: FPS renderizado, mediana, p95, % > 33,33 ms, travamentos, VRAM típica e pico;
-- separação de tempos quando houver: preparação na CPU, espera, execução na GPU, readback, espera da CPU, leitura e publicação da fence.
+- build: exe and hash (SHA-256 or BLAKE3), and PDB GUID/age when available;
+- scene and checkpoints (e.g. cutscene C1, first mission M1);
+- effective profile (e.g. Controle or Candidato) and the variables that differ;
+- resolution, scale, graphics preset and cache (cold or warm);
+- metrics: rendered FPS, median, p95, % > 33.33 ms, hitches, typical and peak VRAM;
+- a split of times when available: CPU preparation, waiting, GPU execution, readback, CPU wait, read and fence publication.
 
 ## 6. GPU
 
-A captura exige a GPU sozinha. A reserva continua sendo `locks\gpu-capture.json` na máquina, com o mesmo `File.Move` atômico, e só depois de confirmar que o teste anterior terminou ou que o usuário liberou. Depois de reservar, comente na Issue **Lock GPU** (`reservado: R04-Davi-01`) e ao liberar (`liberado`). A Issue não substitui o lock local.
+A capture needs the GPU to itself. The reservation is still `locks\gpu-capture.json` on the machine, with the same atomic `File.Move`, and only after confirming that the previous test has finished or the user has released the GPU. After reserving, comment on the **GPU lock** Issue (`reserved: R04-Davi-01`), and again on release (`released`). The Issue does not replace the local lock.
 
-## 7. Consolidação
+## 7. Consolidation
 
-Só a IA consolidadora (R00 ou quem o usuário designar) junta PRs numa build, roda o [teste automatizado](harness/README.md) e publica o score. Veja [docs/consolidacao.md](docs/consolidacao.md). Uma tentativa que mude o runtime pode rodar o mesmo teste e trazer o score no PR, citando o SHA-256 do `Vigiar-Rodada.ps1`.
+Only the consolidating AI (R00 or whoever the user designates) merges PRs into a build, runs the [automated test](harness/README.md) and publishes the score. See [docs/consolidacao.md](docs/consolidacao.md). An attempt that changes the runtime may run the same test and include the score in its PR, citing the SHA-256 of `Vigiar-Rodada.ps1`.
 
-Mudanças no próprio teste (launcher, vigia, pesos do score, patches) vão num PR separado, com a label `coordenacao`.
+Changes to the test itself (launcher, watcher, score weights, patches) go in a separate PR with the `coordination` label.

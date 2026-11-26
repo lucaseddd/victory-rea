@@ -1,5 +1,5 @@
-# Lista de permissao: ignora tudo e libera so texto.
-# Ver POLITICA-DE-DADOS.md. Nada do jogo entra aqui.
+# Allowlist: ignore everything and let only text through.
+# See POLITICA-DE-DADOS.md (data policy). Nothing from the game goes in here.
 *
 !*/
 !.gitignore
@@ -14,11 +14,11 @@
 !*.py
 !*.toml
 
-# Configuracao local com caminhos da maquina: nunca entra.
+# Local configuration with machine paths: never committed.
 harness.toml
 victory.toml
 
-# Mesmo com extensao permitida, estas pastas nunca entram.
+# Even with an allowed extension, these folders never go in.
 REA-COORD/
 evidence/
 evidence-local/
@@ -33,7 +33,7 @@ victory-*/
 __pycache__/
 .venv/
 
-# Redundante com a lista de permissao; fica explicito para quem ler.
+# Redundant with the allowlist; kept explicit for readers.
 *.exe
 *.dll
 *.pdb

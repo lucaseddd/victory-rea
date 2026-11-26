@@ -1,100 +1,142 @@
-# Teste automatizado com score
+# Automated test with a score
 
-Roda o título no VIctory, aperta Enter sozinho nos menus até a primeira cena 3D, marca os tempos e calcula um score de 0 a 100. Tudo roda na sua máquina. Para o repositório volta só o `*.score.md`/`*.score.json`, que contém só números.
+This test runs the title on VIctory and presses Enter by itself through the menus until the first 3D scene. It records milestones and computes a 0–100 score. Everything runs on your machine. Only `*.score.md`/`*.score.json`, which contain numbers alone, come back to the repository.
 
-| Arquivo | Função |
+| File | Role |
 |---|---|
-| [Iniciar-Rodada.ps1](Iniciar-Rodada.ps1) | Launcher: confere hash e firewall, restaura o save da semente, define as `VICTORY_*`, inicia o runtime e abre o vigia |
-| [Vigiar-Rodada.ps1](Vigiar-Rodada.ps1) | Vigia: segue o log, escreve o arquivo de teclas, registra os marcos e calcula o score quando o jogo fecha |
-| [Medir-Rodada.ps1](Medir-Rodada.ps1) | Extrator: resume um ou mais `.stderr` (mundo, VRAM, mipmaps, fila COPY, worker, DirectStorage, quadros pretos) |
-| [harness.example.toml](harness.example.toml) | Modelo de configuração. Copie para `harness.toml`, que o Git ignora |
-| [patches/](patches/README.md) | Diffs de runtime de que o teste depende |
+| [Iniciar-Rodada.ps1](Iniciar-Rodada.ps1) ("start run") | Launcher: checks the hash and firewall, restores the seed save, sets the `VICTORY_*` variables, starts the runtime and opens the watcher |
+| [Vigiar-Rodada.ps1](Vigiar-Rodada.ps1) ("watch run") | Watcher: follows the log, writes the key file, records milestones and computes the score when the game closes |
+| [Medir-Rodada.ps1](Medir-Rodada.ps1) ("measure run") | Extractor: summarizes one or more `.stderr` logs (world, VRAM, mipmaps, COPY queue, worker, DirectStorage, black frames) |
+| [harness.example.toml](harness.example.toml) | Configuration template. Copy it to `harness.toml`, which Git ignores |
+| [patches/](patches/README.md) | Runtime diffs the test depends on |
 
-Origem: launcher, vigia e extrator da candidata 4 (2026-11-26). O launcher foi generalizado: caminhos vêm do `harness.toml` ou de parâmetros, a regra de firewall é localizada pelo programa e não pelo nome, e a pasta da rodada não pode ficar dentro do repositório. No vigia, a única mudança é que o `score.json` grava só o nome do log. O extrator é idêntico.
+**Origin.** These are the launcher, watcher and extractor from candidate 4 (2026-11-26).
 
-## Pré-requisitos
+- **Launcher:** generalized. Paths come from `harness.toml` or parameters, the firewall rule is found by program rather than by name, and the run folder cannot be inside the repository.
+- **Watcher:** two changes. Its messages are in English, and `score.json` stores only the log's file name.
+- **Extractor:** only the messages changed.
+- **Parameter names and score keys** stay in Portuguese, so existing runs and notes remain compatible.
 
-1. Um `victory.exe` compilado com os [patches](patches/README.md) e `--features diagnostics`.
-2. O executável do título, do dump do seu próprio console.
-3. Uma pasta de rodada fora do repositório, com:
-   - `data-semente\`: o save de partida, copiado para `data\` a cada rodada (`-SemSemente` desliga);
-   - `cache\`: opcional, um cache de shaders aquecido.
-4. Firewall do Windows ligado e uma regra de saída bloqueada para cada executável. Num PowerShell **como administrador**:
+## Prerequisites
+
+1. A `victory.exe` built with the [patches](patches/README.md) and `--features diagnostics`.
+2. The title's executable, from your own console's dump.
+3. A run folder outside the repository, containing:
+   - `data-semente\` ("seed data"): the starting save, copied to `data\` on every run (`-SemSemente` turns this off);
+   - `cache\`: optional, a warm shader cache.
+4. Windows Firewall on, and one blocking outbound rule per executable. In a PowerShell window **as administrator**:
 
    ```powershell
-   New-NetFirewallRule -DisplayName 'VIctory runtime offline' -Direction Outbound -Action Block -Profile Any -Program '<caminho do victory.exe>'
+   New-NetFirewallRule -DisplayName 'VIctory runtime offline' -Direction Outbound -Action Block -Profile Any -Program '<path to victory.exe>'
    ```
 
    ```powershell
-   New-NetFirewallRule -DisplayName 'VIctory titulo offline' -Direction Outbound -Action Block -Profile Any -Program '<caminho do executavel do titulo>'
+   New-NetFirewallRule -DisplayName 'VIctory title offline' -Direction Outbound -Action Block -Profile Any -Program '<path to the title executable>'
    ```
 
-## Rodar
+## Running
 
-Tudo num PowerShell **como administrador**, porque o launcher lê as regras do firewall.
+Run everything in a PowerShell window **as administrator**, because the launcher reads the firewall rules.
 
-Conferir hash, firewall e mapeamento, sem executar o título:
+Check the hash, the firewall and the mapping, without running the title:
 
 ```powershell
 .\harness\Iniciar-Rodada.ps1 -Config .\harness\harness.toml -Rapido -MapOnly
 ```
 
-Teste rápido completo. Aperte **F9** quando ficar jogável; o jogo fecha 2 minutos depois:
+Full quick test. Press **F9** when the game becomes playable; the game closes 2 minutes later:
 
 ```powershell
 .\harness\Iniciar-Rodada.ps1 -Config .\harness\harness.toml -Rapido -FecharAposJogavelS 120
 ```
 
-Referência em Series X, com o mesmo vigia e o mesmo score:
+Series X reference, with the same watcher and score:
 
 ```powershell
 .\harness\Iniciar-Rodada.ps1 -Config .\harness\harness.toml -Console series-x -AutoEnter -FecharAposJogavelS 120
 ```
 
-Resumo do log de uma ou mais rodadas:
+Summary of the logs of one or more runs:
 
 ```powershell
-.\harness\Medir-Rodada.ps1 -Log 'D:\victory\rodadas\rapido-*.stderr'
+.\harness\Medir-Rodada.ps1 -Log 'D:\victory\runs\rapido-*.stderr'
 ```
 
-### O que o `-Rapido` liga
+### Parameters
 
-- `--console series-s`: o jogo renderiza menor por dentro e escala sozinho (o fork mediu 1280×720 dentro de 1920×1080). Precisa do patch 03; sem ele, a interface sai preta.
-- `VICTORY_DISPLAY_MODE=1280x720`. É barato, mas o fork mediu que o jogo ignora o modo informado.
-- Enter automático, save da semente, contadores (`VICTORY_FRAME_LOG=1`, `VICTORY_DSTORAGE_STATS=1`) e o vigia.
+| Parameter | Meaning |
+|---|---|
+| `-Config` | `harness.toml` with `runtime_exe`, `runtime_sha256`, `title_exe`, `run_dir` |
+| `-Rapido` | quick preset (see below) |
+| `-Console series-x\|series-s` | console profile passed to the runtime |
+| `-DisplayMode WxH` | `VICTORY_DISPLAY_MODE` reported to the game |
+| `-AutoEnter`, `-EnterApos`, `-EnterIntervalo` | automatic Enter; first press after N s; interval between presses |
+| `-FecharAposJogavelS N` | close the game N s after F9 (playable) |
+| `-MaxMinutos N` | close the game after N minutes in total |
+| `-SemSemente` | do not restore `data\` from `data-semente\` |
+| `-SemVigia` | do not open the watcher (no automatic Enter, no score) |
+| `-DiscoWorkers N` | `VICTORY_DSTORAGE_WORKERS` (patch 05) |
+| `-Fila 0\|1` | `VICTORY_QUEUE2` (readback on the COPY queue) |
+| `-Worker 0\|1` | `VICTORY_HEAP_WORKER` |
+| `-Mips 0\|1` | `VICTORY_LEVELS_ON_DEMAND` |
+| `-PequenosMB` | `VICTORY_TILES_SMALL_WHEN_FULL_MB` |
+| `-ReservaAlvosMB` | `VICTORY_CARD_ROOM_FOR_TARGETS_MB` |
+| `-PisoTexturasMB` | `VICTORY_TEXTURE_FLOOR_MB` (patch 02) |
+| `-TexturaAuto` | `VICTORY_TEXTURE_AUTO_VRAM=1` |
+| `-SemContadores` | turns off `VICTORY_FRAME_LOG` and `VICTORY_DSTORAGE_STATS` |
+| `-Capturar` | `VICTORY_CAPTURE` into the run folder (captures stay local) |
+| `-MapOnly` | map without running |
 
-Cada item pode ser sobrescrito pelo parâmetro correspondente. Os eixos das candidatas anteriores também estão disponíveis: `-Fila`, `-Worker`, `-Mips`, `-PequenosMB`, `-ReservaAlvosMB`, `-PisoTexturasMB`, `-TexturaAuto`, `-DiscoWorkers`.
+### What `-Rapido` turns on
 
-## O que o vigia faz
+- `--console series-s`: the game renders smaller internally and scales the image itself (the fork measured 1280×720 inside 1920×1080). Needs patch 03; without it, the interface is black.
+- `VICTORY_DISPLAY_MODE=1280x720`. It is cheap, but the fork measured that the game ignores the reported mode.
+- Automatic Enter, the seed save, counters (`VICTORY_FRAME_LOG=1`, `VICTORY_DSTORAGE_STATS=1`) and the watcher.
 
-Ele só lê o log e o relógio. As únicas ações sobre o jogo são escrever o arquivo de teclas e, se você pedir, fechar o processo no fim.
+Each item can be overridden with its parameter.
 
-- **Enter automático:** começa aos 20 s (`-EnterApos`) e repete a cada 6 s (`-EnterIntervalo`), só enquanto o jogo está numa tela leve (até 50 draws por quadro: menu, loading, escolha de personagem). Para de vez no primeiro quadro com mais de 1.000 draws, para não apertar nada na cutscene.
-- **Marcos:** primeiro quadro, primeiro e último Enter, primeira cena 3D, jogável (F9), primeiro save gravado depois da cena 3D e marcas livres (F10). Tudo vai para `<log>.marcos.log`.
-- **Encerramento:** `-FecharAposJogavelS N` fecha N segundos depois do F9; `-MaxMinutos N` fecha por tempo.
-- **Saída:** `<log>.score.json` e `<log>.score.md`.
+## What the watcher does
+
+It only reads the log and the clock. Its only actions on the game are writing the key file and, if you ask, closing the process at the end.
+
+- **Automatic Enter:**
+  - starts at 20 s (`-EnterApos`) and repeats every 6 s (`-EnterIntervalo`);
+  - only while the game is on a light screen: up to 50 draws per frame (menu, loading, character select);
+  - stops for good at the first frame with more than 1,000 draws, so nothing is pressed during the cutscene.
+- **Milestones:** first frame, first and last Enter, first 3D scene, playable (F9), first save written after the 3D scene, and free marks (F10). They all go to `<log>.marcos.log`.
+- **Ending:** `-FecharAposJogavelS N` closes the game N seconds after F9; `-MaxMinutos N` closes it on a timer.
+- **Output:** `<log>.score.json` and `<log>.score.md`.
 
 ## Score
 
-| Componente | Peso | Cálculo |
+| Component (key) | Weight | Computation |
 |---|---|---|
-| progresso | 30 | 10 = mostrou imagem; 50 = chegou à primeira cena 3D; 100 = jogável (F9) |
-| velocidade | 25 | FPS mediano no mundo ÷ 30 × 100, limitado a 100. Usa o trecho jogável se houver F9; senão, a cutscene |
-| carregamento | 20 | 100 se a primeira cena 3D aparece em até 60 s; 0 em 20 min; linear entre os dois |
-| shaders | 15 | % de draws do mundo que não foram descartados por falta de pipeline (mediana por quadro) |
-| imagem | 10 | Nota 0–100 da comparação com a sua gravação de referência (`cutscene-lab/score.py`), passada com `-ImagemScore` |
+| progress (`progresso`) | 30 | 10 = showed an image; 50 = reached the first 3D scene; 100 = playable (F9) |
+| speed (`velocidade`) | 25 | median in-world FPS ÷ 30 × 100, capped at 100. Uses the playable stretch if F9 was pressed, otherwise the cutscene |
+| loading (`carregamento`) | 20 | 100 if the first 3D scene appears within 60 s; 0 at 20 min; linear in between |
+| shaders (`shaders`) | 15 | % of world draws not dropped for lack of a pipeline (per-frame median) |
+| image (`imagem`) | 10 | 0–100 score from comparing against your reference recording (`cutscene-lab/score.py`), passed with `-ImagemScore` |
 
-- **Total:** média ponderada dos componentes que têm dado. Um componente sem dado sai da média e não conta como zero.
-- **Mundo:** amostras com mais de 1.000 draws por quadro (`-MundoDraws`).
-- **Pesos e escalas:** são convenções deste teste. Se mudar algum, registre a mudança no PR, porque scores de versões diferentes do vigia não são comparáveis. Cite o SHA-256 do `Vigiar-Rodada.ps1` no relatório.
+- **Total:** weighted average of the components that have data. A component without data drops out of the average; it does not count as zero.
+- **World:** samples with more than 1,000 draws per frame (`-MundoDraws`).
+- **Weights and scales:** these are conventions of this test. If you change any, say so in the PR, because scores from different watcher versions are not comparable. Cite the SHA-256 of `Vigiar-Rodada.ps1` in the report.
 
-### O que publicar
+### What to publish
 
-Do `.score.md` entram no PR: o total, os componentes, os marcos em segundos, as medianas e p95 de FPS e as contagens de shaders. Ficam na máquina: o `.stderr`, o `.stdout`, o `.marcos.log`, o arquivo de teclas, o `.settings.txt` e a pasta da rodada. Nesta cópia do vigia, o campo `log` do `score.json` guarda só o nome do arquivo, não o caminho local.
+- **Goes into the PR** (from `.score.md`):
+  - the total and the components;
+  - the milestones in seconds;
+  - the FPS medians and p95;
+  - the shader counts.
+- **Stays on the machine:** the `.stderr`, the `.stdout`, the `.marcos.log`, the key file, the `.settings.txt` and the run folder.
+- **Log path:** in this copy of the watcher, the `log` field of `score.json` holds only the file name, not the local path.
 
-## Limitações conhecidas
+## Known limitations
 
-- O F9 é manual. O primeiro save depois da cena 3D serve de indício automático, mas não substitui o F9 no score.
-- A leitura de teclas usa `GetAsyncKeyState`, então o F9 funciona com qualquer janela em foco.
-- A nota de imagem depende de uma gravação de referência local. Sem ela, o componente fica fora da média.
-- Com a candidata 4, ainda não foram verificados: a imagem do Series S com os dois planos, a reação do jogo ao `VICTORY_KEYS_FILE` e o ganho do `-DiscoWorkers` [relatado].
+- F9 is manual. The first save after the 3D scene is an automatic hint, but it does not replace F9 in the score.
+- Key reading uses `GetAsyncKeyState`, so F9 works whichever window has focus.
+- The image score needs a local reference recording. Without it, the component stays out of the average.
+- Not yet verified with candidate 4 [relatado]:
+  - the Series S image with both planes;
+  - the game's response to `VICTORY_KEYS_FILE`;
+  - the gain from `-DiscoWorkers`.

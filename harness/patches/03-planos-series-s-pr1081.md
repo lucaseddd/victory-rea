@@ -1,10 +1,10 @@
-# Composição dos dois planos do Series S (porte do fxceless PR #1081)
+# Composing the two Series S planes (port of fxceless PR #1081)
 
-Candidata 4. Com `--console series-s`, o título apresenta dois planos: o jogo e a interface. Sem o patch só o primeiro aparece, e o boot, os loadings e os prompts saem pretos. `VICTORY_PLANES=0` volta ao comportamento antigo; `VICTORY_PLANE_ALPHA=straight` usa alfa direto. `compose.rs` é o do PR, sem mudança (head `08ab0418`). O acréscimo local desenha a caixa de FPS também no caminho de dois planos.
+Candidate 4. With `--console series-s`, the title presents two planes: the game and the interface. Without this patch only the first one shows, and boot, loading screens and prompts come out black. `VICTORY_PLANES=0` restores the old behavior; `VICTORY_PLANE_ALPHA=straight` uses straight alpha. `compose.rs` is the PR's file, unchanged (head `08ab0418`). The local addition also draws the FPS box on the two-plane path.
 
-- **Aplicar em ordem**, sobre `fxceless/victory-fork` no commit `f6a09d3b` com o PR #45 (candidata 1). Os números de linha dos hunks seguem essa cadeia.
-- Licença: o VIctory e o fork são GPL-3.0. Este diff é derivado desse código e segue a mesma licença.
-- Para aplicar: copie o bloco `diff` para `03-planos-series-s-pr1081.patch` e rode `git apply --check 03-planos-series-s-pr1081.patch`, depois `git apply 03-planos-series-s-pr1081.patch`.
+- **Apply in order**, on top of `fxceless/victory-fork` at commit `f6a09d3b` with PR #45 (candidate 1). Hunk line numbers follow that chain.
+- License: VIctory and the fork are GPL-3.0. This diff derives from that code and is under the same license.
+- To apply: copy the `diff` block to `03-planos-series-s-pr1081.patch`, run `git apply --check 03-planos-series-s-pr1081.patch`, then `git apply 03-planos-series-s-pr1081.patch`.
 
 ## `crates/victory-gpu/src/compose.rs`
 

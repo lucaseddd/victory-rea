@@ -1,33 +1,40 @@
-# Política de dados
+# Data policy
 
-Segue a política de assets do VIctory upstream (`docs/asset-policy.md`, regra nº 1): **nada do jogo é guardado neste repositório.**
+This follows the upstream VIctory asset policy (`docs/asset-policy.md`, rule #1): **nothing from the game is ever stored in this repository.**
 
-## Não pode entrar, em nenhuma forma
+## Not allowed, in any form
 
-- Assets do título: modelos, texturas, shaders, áudio, vídeo, texto, arquivos `.rpf` e outros pacotes.
-- O executável do título ou qualquer parte dele: seções, strings, tabelas, recursos.
-- Derivados: código descompilado ou disassembly do título, dumps de shader, tabelas extraídas, screenshots, gravações, capturas RenderDoc/PIX.
-- Binários das builds: `.exe`, `.dll`, `.pdb`, `.lib`, caches de shader e de pipeline.
-- Logs brutos (`*.stderr`, `*.stdout`, `.log`, `.etl`, dumps). Do log sai só o número agregado.
-- Dados pessoais: nome real, e-mail, caminhos com nome de usuário, IDs de hardware.
+- Title assets: models, textures, shaders, audio, video, text, `.rpf` files and other packages.
+- The title's executable or any part of it: sections, strings, tables, resources.
+- Derived material: decompiled code or disassembly of the title, shader dumps, extracted tables, screenshots, recordings, RenderDoc/PIX captures.
+- Build binaries: `.exe`, `.dll`, `.pdb`, `.lib`, shader and pipeline caches.
+- Raw logs (`*.stderr`, `*.stdout`, `.log`, `.etl`, dumps). Only aggregate numbers come out of a log.
+- Personal data: real names, e-mail addresses, paths containing a user name, hardware IDs.
 
-## Pode entrar
+## Allowed
 
-- Identidade de build: hash do executável (SHA-256 ou BLAKE3) e CodeView GUID/age do PDB.
-- Offsets e RVAs de funções, com o nome do símbolo do VIctory (código aberto) ou um nome nosso.
-- Números agregados: mediana, p95, contagens, médias, máximos, tabelas pequenas em CSV.
-- Variáveis de ambiente e configuração do runtime (`VICTORY_*`).
-- Relatórios em Markdown, scripts próprios de medição e conversão, dados sintéticos gerados por esses scripts.
-- Referências a linhas do fonte do VIctory ou do fork (`host.rs:9313`), que é código aberto.
+- Build identity: the executable's hash (SHA-256 or BLAKE3) and the PDB's CodeView GUID/age.
+- Function offsets and RVAs, with the VIctory symbol name (open source) or a name of our own.
+- Aggregate numbers: medians, p95, counts, averages, maximums, small CSV tables.
+- Runtime environment variables and configuration (`VICTORY_*`).
+- Markdown reports, our own measurement and conversion scripts, and synthetic data those scripts generate.
+- References to lines in the VIctory or fork source (`host.rs:9313`), which is open source.
 
-Na dúvida, não envie. Descreva o achado em palavras e cite o offset.
+When in doubt, leave it out. Describe the finding in words and cite the offset.
 
-## Como a regra é aplicada
+## How the rule is enforced
 
-1. O `.gitignore` funciona como lista de permissão: ignora tudo e libera só `.md`, `.yml`, `.yaml`, `.json`, `.csv`, `.ps1`, `.py` e `.toml`. `harness.toml` e `victory.toml`, que contêm caminhos da máquina, ficam de fora.
-2. `scripts/Test-RepoContent.ps1` recusa extensões fora da lista, binários, arquivos acima de 512 KiB, sequências longas de hex ou base64, listagens de disassembly, e-mails e caminhos de perfil de usuário do Windows.
-3. O workflow `checagem-conteudo` roda o mesmo script em todo push e PR.
+1. `.gitignore` works as an allowlist: it ignores everything and lets through only `.md`, `.yml`, `.yaml`, `.json`, `.csv`, `.ps1`, `.py` and `.toml`. `harness.toml` and `victory.toml`, which hold machine paths, are kept out.
+2. `scripts/Test-RepoContent.ps1` rejects:
+   - extensions outside the allowlist;
+   - binaries;
+   - files over 512 KiB;
+   - long hex or base64 runs;
+   - disassembly listings;
+   - e-mail addresses;
+   - Windows user-profile paths.
+3. The `content-check` workflow runs the same script on every push and PR.
 
-## Se algo escapar
+## If something slips through
 
-Um commit de correção não basta. Reescreva o histórico (`git filter-repo --path <arquivo> --invert-paths`), force o push e peça a todos que clonem de novo. Avise na Issue de R00.
+A follow-up commit is not enough. Rewrite history (`git filter-repo --path <file> --invert-paths`), force-push and have everyone re-clone. Report it on the R00 Issue.

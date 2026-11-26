@@ -1,32 +1,32 @@
-# 3. Do fonte ao PE
+# 3. From source to PE
 
-O VIctory é código aberto e a build traz o PDB. Por isso a engenharia reversa aqui é sobretudo **confirmação**: o fonte diz o que deveria acontecer; o PDB e o PE dizem o que foi compilado com aquela configuração.
+VIctory is open source and the build ships its PDB. So the reverse engineering here is mostly **confirmation**: the source says what should happen; the PDB and the PE say what was compiled with that configuration.
 
-## Fluxo
+## Flow
 
-1. **Fonte.** Ache a função e as variáveis que a controlam. Exemplo: `queue2::second()` só retorna uma fila quando `VICTORY_QUEUE2=1`.
-2. **PDB.** Confirme que o símbolo existe e anote o RVA. Funções pequenas costumam ser inlined. Nesse caso, ache o chamador e o ponto da chamada.
-3. **PE.** No Ghidra, importe o `victory.exe` com o `victory.pdb` (File → Import, depois Analysis com PDB). Vá ao RVA e confira:
-   - a chamada esperada (por exemplo, `ExecuteCommandLists` e `Signal` em sequência);
-   - o ramo controlado pela variável;
-   - a ordem das operações (quem publica a fence depois de quê).
-4. **Conferência cruzada.** `dumpbin /disasm /range:<VA ini>,<VA fim> victory.exe` dá uma segunda leitura sem Ghidra. Anote só endereço e nome; a listagem fica na evidência local.
-5. **Spot-check independente.** Outra IA confere uma amostra das afirmações. Em 2026-11-26, R00 conferiu 8 de 8 endereços de R01/R02 no PE da candidata [relatado].
+1. **Source.** Find the function and the variables that control it. Example: `queue2::second()` only returns a queue when `VICTORY_QUEUE2=1`.
+2. **PDB.** Confirm the symbol exists and note its RVA. Small functions are often inlined; in that case, find the caller and the call site.
+3. **PE.** In Ghidra, import `victory.exe` together with `victory.pdb` (File → Import, then Analysis with the PDB). Go to the RVA and check:
+   - the expected call (for example, `ExecuteCommandLists` followed by `Signal`);
+   - the branch controlled by the variable;
+   - the order of operations (who publishes the fence after what).
+4. **Cross-check.** `dumpbin /disasm /range:<start VA>,<end VA> victory.exe` gives a second reading without Ghidra. Record only the address and the name; the listing stays in the local evidence.
+5. **Independent spot-check.** Another AI checks a sample of the claims. On 2026-11-26, R00 confirmed 8 of 8 addresses from R01/R02 in the candidate's PE [relatado].
 
-## O que vira texto publicável
+## What becomes publishable text
 
-| Pode | Não pode |
+| Allowed | Not allowed |
 |---|---|
-| `fence::set` chamado em RVA `0x2AE4E3`, depois de `Late::Write` | as linhas de instrução ao redor |
-| "o `Wait` da COPY fica num laço sobre pares (fence, valor)" | a listagem do laço |
-| "`VICTORY_QUEUE2=1` ativa `BESIDE`, `Second::sent_up` e duas filas COPY" | strings ou tabelas copiadas do título |
-| hash, GUID/age, RVAs, nomes de símbolos do VIctory | qualquer coisa do executável do título |
+| `fence::set` called at RVA `0x2AE4E3`, after `Late::Write` | the surrounding instruction lines |
+| "the COPY `Wait` sits in a loop over (fence, value) pairs" | the listing of the loop |
+| "`VICTORY_QUEUE2=1` enables `BESIDE`, `Second::sent_up` and two COPY queues" | strings or tables copied from the title |
+| hashes, GUID/age, RVAs, VIctory symbol names | anything from the title's executable |
 
-A checagem `Test-RepoContent` recusa listagens com endereço, bytes e mnemônico, e blocos de instruções. Não tente contorná-la: descreva em palavras.
+The `Test-RepoContent` check rejects listings with an address, bytes and a mnemonic, and blocks of instructions. Do not try to get around it: describe the code in words.
 
-## Ghidra assistido por IA
+## AI-assisted Ghidra
 
-- Peça à IA uma pergunta fechada por vez ("quem chama `relay_land` e com que fence?"), não "analise o exe".
-- Dê o RVA e o nome do símbolo; a IA navega mais rápido e erra menos.
-- Exija na resposta: endereço, símbolo, a linha correspondente no fonte e a marca `[obs-local]`.
-- Desconfie de conclusões sobre o ramo "padrão" sem a configuração efetiva da rodada (`<log>.settings.txt`).
+- Ask the AI one closed question at a time ("who calls `relay_land`, and with which fence?"), not "analyze the exe".
+- Give it the RVA and the symbol name; it navigates faster and makes fewer mistakes.
+- Require in the answer: address, symbol, the matching source line and the `[obs-local]` tag.
+- Be wary of conclusions about the "default" branch that ignore the run's effective configuration (`<log>.settings.txt`).

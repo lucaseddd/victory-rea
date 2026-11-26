@@ -1,7 +1,7 @@
-# Índice dos resultados
+# Results index
 
-Equivalente ao `REA-INDICE.md` local. **Só PRs de R00 (consolidação) editam este arquivo.**
+Counterpart of the local `REA-INDICE.md`. **Only R00 (consolidation) PRs edit this file.**
 
-| Tarefa | Issue | Estado | Resultado em uma linha | Relatório |
+| Task | Issue | State | One-line result | Report |
 |---|---|---|---|---|
-| — | — | — | Ainda sem resultados publicados | — |
+| — | — | — | No results published yet | — |

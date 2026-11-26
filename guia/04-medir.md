@@ -1,51 +1,51 @@
-# 4. Medir
+# 4. Measuring
 
-## A linha de quadro do log
+## The log's frame line
 
-O runtime escreve no `stderr`, a cada ~5 s, uma linha agregada no formato abaixo:
+Every ~5 s the runtime writes an aggregate line to `stderr`, in this format:
 
 ```
 <fps> fps, <ms> ms/frame (<x> preparing …; <y> on the GPU; <z> copying back <n> MB), <d> draws/frame[, dropped <k> without a host pipeline]
 ```
 
-- **draws/frame separa as fases.** Cerca de 10 draws é menu ou loading. Acima de 500–1.000 é cena 3D (cutscene ou mundo). O vigia usa 50 e 1.000 como limites.
-- **Média de rodada inteira engana.** Na candidata 1, o total ponderado deu 26,7 fps, mas o mundo ficou em 1,15 fps [relatado, R04]. Sempre separe por fase.
-- **Com `VICTORY_FRAME_LOG=1`** sai também o tempo por quadro (necessário para p95 de verdade e para atribuir picos).
+- **draws/frame separates the phases.** About 10 draws is a menu or a loading screen. Above 500–1,000 is a 3D scene (cutscene or world). The watcher uses 50 and 1,000 as thresholds.
+- **A whole-run average misleads.** On candidate 1, the weighted total was 26.7 fps but the world ran at 1.15 fps [relatado, R04]. Always split by phase.
+- **With `VICTORY_FRAME_LOG=1`** the per-frame time is logged too, which is needed for a real p95 and to attribute spikes.
 
-## Contadores úteis
+## Useful counters
 
-| Variável | O que acrescenta ao log |
+| Variable | What it adds to the log |
 |---|---|
-| `VICTORY_FRAME_LOG=1` | tempo por quadro, `PipelineWaitUs`, submissões por quadro |
-| `VICTORY_DSTORAGE_STATS=1` | pedidos por Submit, contiguidade, latência, leitura/descompressão/destino (patch 01) |
-| `VICTORY_LOG=info` | VRAM própria e compartilhada, orçamento DXGI, texturas vivas, piso efetivo |
-| build `diagnostics` | detecção de quadro preto (`a black frame after a frame that was not`) |
+| `VICTORY_FRAME_LOG=1` | per-frame time, `PipelineWaitUs`, submissions per frame |
+| `VICTORY_DSTORAGE_STATS=1` | requests per Submit, contiguity, latency, read/decode/destination time (patch 01) |
+| `VICTORY_LOG=info` | own and shared VRAM, DXGI budget, live textures, effective floor |
+| `diagnostics` build | black-frame detection (`a black frame after a frame that was not`) |
 
-O [Medir-Rodada.ps1](../harness/Medir-Rodada.ps1) resume tudo isso por rodada.
+[Medir-Rodada.ps1](../harness/Medir-Rodada.ps1) summarizes all of this per run.
 
-## Protocolo comparável
+## Comparable protocol
 
-Todo número informa:
+Every number states:
 
 - build (hash);
-- cena e checkpoints;
-- perfil efetivo (as `VICTORY_*` do `.settings.txt`);
-- resolução e console (`series-x`/`series-s`);
-- cache frio ou quente.
+- scene and checkpoints;
+- effective profile (the `VICTORY_*` in `.settings.txt`);
+- resolution and console (`series-x`/`series-s`);
+- cold or warm cache.
 
-Ao comparar duas configurações:
+When comparing two configurations:
 
-- mude **uma** variável por vez;
-- alterne A/B/A/B, em vez de AAA/BBB;
-- use a mesma semente de save;
-- informe mediana, p95, % de quadros > 33,33 ms, travamentos e VRAM típica e pico.
+- change **one** variable at a time;
+- alternate A/B/A/B rather than AAA/BBB;
+- use the same save seed;
+- report the median, p95, % of frames > 33.33 ms, hitches, and typical and peak VRAM.
 
-## GPU exclusiva
+## Exclusive GPU
 
-Só uma captura por vez. A reserva é o arquivo local `locks\gpu-capture.json`, criado com `[System.IO.File]::Move(temp, destino)`, que falha se o destino existir. Reserve só depois de confirmar que nenhum `victory` está rodando ou que o usuário liberou. Ao terminar, mova o lock para `locks\arquivo\`.
+One capture at a time. The reservation is the local file `locks\gpu-capture.json`, created with `[System.IO.File]::Move(temp, destination)`, which fails if the destination exists. Reserve only after confirming that no `victory` process is running or that the user has released the GPU. When done, move the lock to `locks\arquivo\`.
 
-## Ferramentas externas
+## External tools
 
-- **PresentMon** precisa de administrador ou do grupo Performance Log Users. Sem isso, dá "access denied".
-- **RenderDoc/PIX**: as capturas contêm assets do título. Ficam na máquina e nunca vão para o repositório.
-- **Imagem:** a comparação com a referência roda local (`cutscene-lab/score.py`). Só a nota sai.
+- **PresentMon** needs administrator rights or membership in Performance Log Users. Without them it fails with "access denied".
+- **RenderDoc/PIX** captures contain title assets. They stay on the machine and never go into the repository.
+- **Image:** the comparison with the reference runs locally (`cutscene-lab/score.py`). Only the score comes out.

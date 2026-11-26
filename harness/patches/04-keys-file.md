@@ -1,10 +1,10 @@
-# VICTORY_KEYS_FILE: teclas dirigidas por arquivo
+# VICTORY_KEYS_FILE: file-driven key presses
 
-Candidata 4, só em build com `--features diagnostics`. Cada vez que o conteúdo do arquivo muda, o runtime segura por 0,2 s a tecla nomeada na última palavra da última linha (mesmos nomes de `VICTORY_KEYS`). É o que permite ao `Vigiar-Rodada.ps1` apertar Enter só quando o jogo está em menu ou loading.
+Candidate 4, only in builds with `--features diagnostics`. Each time the file's contents change, the runtime holds for 0.2 s the key named by the last word of the last line (same names as `VICTORY_KEYS`). This is what lets `Vigiar-Rodada.ps1` press Enter only while the game is in a menu or loading screen.
 
-- **Aplicar em ordem**, sobre `fxceless/victory-fork` no commit `f6a09d3b` com o PR #45 (candidata 1). Os números de linha dos hunks seguem essa cadeia.
-- Licença: o VIctory e o fork são GPL-3.0. Este diff é derivado desse código e segue a mesma licença.
-- Para aplicar: copie o bloco `diff` para `04-keys-file.patch` e rode `git apply --check 04-keys-file.patch`, depois `git apply 04-keys-file.patch`.
+- **Apply in order**, on top of `fxceless/victory-fork` at commit `f6a09d3b` with PR #45 (candidate 1). Hunk line numbers follow that chain.
+- License: VIctory and the fork are GPL-3.0. This diff derives from that code and is under the same license.
+- To apply: copy the `diff` block to `04-keys-file.patch`, run `git apply --check 04-keys-file.patch`, then `git apply 04-keys-file.patch`.
 
 ## `crates/victory-hle/src/modules/gameinput.rs`
 

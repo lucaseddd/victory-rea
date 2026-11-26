@@ -1,10 +1,10 @@
-# VICTORY_DSTORAGE_STATS: contadores do DirectStorage
+# VICTORY_DSTORAGE_STATS: DirectStorage counters
 
-Candidata 2. Liga com `VICTORY_DSTORAGE_STATS=1`. A cada 5 s, registra no log os pedidos por Submit, a contiguidade (`adjacent_pairs`/`joined_reads`), a latência de fila e o tempo de leitura, descompressão e destino. O launcher liga por padrão e o `Medir-Rodada.ps1` resume as linhas `dstorage per Submit`.
+Candidate 2. Enabled with `VICTORY_DSTORAGE_STATS=1`. Every 5 s it logs requests per Submit, contiguity (`adjacent_pairs`/`joined_reads`), queue latency, and read, decode and destination time. The launcher enables it by default, and `Medir-Rodada.ps1` summarizes the `dstorage per Submit` lines.
 
-- **Aplicar em ordem**, sobre `fxceless/victory-fork` no commit `f6a09d3b` com o PR #45 (candidata 1). Os números de linha dos hunks seguem essa cadeia.
-- Licença: o VIctory e o fork são GPL-3.0. Este diff é derivado desse código e segue a mesma licença.
-- Para aplicar: copie o bloco `diff` para `01-dstorage-stats.patch` e rode `git apply --check 01-dstorage-stats.patch`, depois `git apply 01-dstorage-stats.patch`.
+- **Apply in order**, on top of `fxceless/victory-fork` at commit `f6a09d3b` with PR #45 (candidate 1). Hunk line numbers follow that chain.
+- License: VIctory and the fork are GPL-3.0. This diff derives from that code and is under the same license.
+- To apply: copy the `diff` block to `01-dstorage-stats.patch`, run `git apply --check 01-dstorage-stats.patch`, then `git apply 01-dstorage-stats.patch`.
 
 ## `crates/victory-hle/src/modules/dstorage.rs`
 

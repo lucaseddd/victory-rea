@@ -1,18 +1,18 @@
-# VIctory REA · guia de engenharia reversa assistida e teste automatizado com score
+# VIctory REA: reverse-engineering guide and automated scored test
 
-Este repositório reúne três peças para levar um título de Xbox Series a 30 FPS renderizados, com imagem correta, no [VIctory](https://github.com/Marvisak/VIctory):
+This repository brings together three pieces for running an Xbox Series title at 30 rendered FPS, with a correct image, on [VIctory](https://github.com/Marvisak/VIctory):
 
-1. **Um guia de REA.** Como usar engenharia reversa assistida (fonte + PDB + PE, com Ghidra e `dumpbin`) para entender o runtime, medir e propor mudanças. → [guia/](guia/README.md)
-2. **Um teste automatizado com score.** Um launcher e um vigia rodam o título, apertam Enter sozinhos até a primeira cena 3D, marcam os tempos e dão uma nota de 0 a 100 por progresso, velocidade, carregamento, shaders e imagem. → [harness/](harness/README.md)
-3. **Coordenação de várias IAs em paralelo.** Uma Issue por tarefa, uma área por IA, um PR por tentativa, e uma IA mais forte que consolida, monta a build e roda o teste. → [CONTRIBUTING.md](CONTRIBUTING.md)
+1. **A REA guide.** How to use assisted reverse engineering (source + PDB + PE, with Ghidra and `dumpbin`) to understand the runtime, measure it and propose changes. → [guia/](guia/README.md)
+2. **An automated test with a score.** A launcher and a watcher run the title, press Enter on their own until the first 3D scene, record timestamps and give a 0–100 score for progress, speed, loading, shaders and image. → [harness/](harness/README.md)
+3. **Coordination of several AIs in parallel.** One Issue per task, one area per AI, one PR per attempt, and a stronger AI that consolidates, builds a candidate and runs the test. → [CONTRIBUTING.md](CONTRIBUTING.md)
 
-**Aqui só entra texto.** O jogo, os executáveis, os logs brutos e as capturas ficam na máquina local. Veja [POLITICA-DE-DADOS.md](POLITICA-DE-DADOS.md).
+**Only text goes in here.** The game, executables, raw logs and captures stay on the local machine. See [POLITICA-DE-DADOS.md](POLITICA-DE-DADOS.md) (data policy).
 
-## Início rápido
+## Quick start
 
-Ler o guia: comece por [guia/README.md](guia/README.md) e pelo [mapa das áreas](guia/05-areas.md).
+Read the guide: start with [guia/README.md](guia/README.md) and the [area map](guia/05-areas.md).
 
-Rodar o teste (PowerShell como administrador, com um `victory.exe` compilado com os [patches](harness/patches/README.md)):
+Run the test (PowerShell as administrator, with a `victory.exe` built with the [patches](harness/patches/README.md)):
 
 ```powershell
 Copy-Item .\harness\harness.example.toml .\harness\harness.toml
@@ -26,57 +26,61 @@ Copy-Item .\harness\harness.example.toml .\harness\harness.toml
 .\harness\Iniciar-Rodada.ps1 -Config .\harness\harness.toml -Rapido -FecharAposJogavelS 120
 ```
 
-Aperte F9 quando o jogo ficar jogável. O score sai em `<log>.score.md`, na pasta da rodada.
+Press F9 when the game becomes playable. The score is written to `<log>.score.md` in the run folder.
 
 ## Score
 
-| Componente | Peso | Resumo |
+| Component | Weight | Summary |
 |---|---|---|
-| progresso | 30 | imagem (10) → primeira cena 3D (50) → jogável (100) |
-| velocidade | 25 | FPS mediano no mundo ÷ 30 |
-| carregamento | 20 | primeira cena 3D em 60 s = 100; em 20 min = 0 |
-| shaders | 15 | % de draws não descartados por falta de pipeline |
-| imagem | 10 | nota da comparação com uma gravação de referência local |
+| progresso (progress) | 30 | image (10) → first 3D scene (50) → playable (100) |
+| velocidade (speed) | 25 | median in-world FPS ÷ 30 |
+| carregamento (loading) | 20 | first 3D scene within 60 s = 100; at 20 min = 0 |
+| shaders | 15 | % of draws not dropped for lack of a pipeline |
+| imagem (image) | 10 | score from comparing against a local reference recording |
 
-Detalhes, limitações e o que publicar: [harness/README.md](harness/README.md#score).
+Details, limitations and what to publish: [harness/README.md](harness/README.md#score).
 
-## Como as IAs trabalham
+## How the AIs work
 
 ```
-            Issues R00–R15 (uma por tarefa, label por área)
+            Issues R00–R15 (one per task, one area label each)
                                │
      ┌───────────┬─────────────┼─────────────┬─────────────┐
   readback   vram-mips   directstorage    present      shaders  …
-  (IA A)      (IA B)        (IA C)        (IA D)        (IA E)
+  (AI A)      (AI B)        (AI C)        (AI D)        (AI E)
      │           │             │             │             │
-     └── PR por tentativa: relatório em texto + números agregados ──┘
+     └──── one PR per attempt: text report + aggregate numbers ───┘
                                │
-              consolidação periódica (IA mais forte)
-     lê os PRs → monta candidata local → harness → score publicado
+              periodic consolidation (stronger AI)
+   reads the PRs → builds a local candidate → harness → publishes score
 ```
 
-## Onde está cada coisa
+## Where things are
 
-| Caminho | Conteúdo |
+| Path | Contents |
 |---|---|
-| [guia/](guia/README.md) | Guia de REA no VIctory: ambiente, identidade da build, fonte → PDB → PE, medição, mapa das áreas, armadilhas |
-| [harness/](harness/README.md) | Teste automatizado: launcher, vigia com score, extrator de log, exemplo de configuração |
-| [harness/patches/](harness/patches/README.md) | Diffs de runtime de que o teste depende (`VICTORY_KEYS_FILE`, `VICTORY_TEXTURE_FLOOR_MB`, `VICTORY_DSTORAGE_STATS`, planos do Series S) |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Protocolo: Issue, assignee, PR por tentativa, marcação das evidências |
-| [docs/consolidacao.md](docs/consolidacao.md) | Ciclo da IA consolidadora |
-| [MAPEAMENTO-REA-COORD.md](MAPEAMENTO-REA-COORD.md) | Proposta de como o quadro local `REA-COORD` vira Issues |
-| [tentativas/](tentativas/README.md) | Relatórios das tentativas, por tarefa |
-| [POLITICA-DE-DADOS.md](POLITICA-DE-DADOS.md) | O que pode e o que não pode entrar |
-| `.github/` | Templates de Issue e PR, labels e a checagem automática |
+| [guia/](guia/README.md) | REA guide for VIctory: environment, build identity, source → PDB → PE, measuring, area map, pitfalls |
+| [harness/](harness/README.md) | Automated test: launcher, watcher with score, log extractor, example configuration |
+| [harness/patches/](harness/patches/README.md) | Runtime diffs the test depends on (`VICTORY_KEYS_FILE`, `VICTORY_TEXTURE_FLOOR_MB`, `VICTORY_DSTORAGE_STATS`, Series S planes) |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Protocol: Issue, assignee, one PR per attempt, evidence tags |
+| [docs/consolidacao.md](docs/consolidacao.md) | The consolidating AI's cycle |
+| [MAPEAMENTO-REA-COORD.md](MAPEAMENTO-REA-COORD.md) | Proposed mapping from the local `REA-COORD` board to Issues |
+| [tentativas/](tentativas/README.md) | Attempt reports, per task |
+| [POLITICA-DE-DADOS.md](POLITICA-DE-DADOS.md) | What may and may not go in |
+| `.github/` | Issue and PR templates, labels and the automated check |
 
-## Antes de cada commit
+## Before every commit
 
 ```powershell
 powershell -File scripts\Test-RepoContent.ps1
 ```
 
-O mesmo script roda no GitHub Actions em todo push e PR e recusa binários, `.exe`, `.dll`, `.pdb`, `.rpf`, imagens, vídeos, `*.stderr`, arquivos acima de 512 KiB, listagens de disassembly e dados pessoais.
+The same script runs on GitHub Actions for every push and PR. It rejects binaries, `.exe`, `.dll`, `.pdb`, `.rpf`, images, videos, `*.stderr`, files over 512 KiB, disassembly listings and personal data.
 
-## Licença
+## Note on names
 
-Os diffs em `harness/patches/` derivam do VIctory e do fork, que são GPL-3.0, e seguem essa licença.
+File names and the scripts' parameters (`-Rapido`, `-FecharAposJogavelS`, …) and score keys (`progresso`, `velocidade`, …) are in Portuguese, the language the project started in. They are kept as-is for compatibility with existing runs. Each one is explained in English where it is used.
+
+## License
+
+The diffs in `harness/patches/` derive from VIctory and its fork, which are GPL-3.0, and are under that license.

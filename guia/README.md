@@ -1,23 +1,23 @@
-# Guia de REA no VIctory
+# REA guide for VIctory
 
-REA aqui é engenharia reversa assistida: uma IA (ou você) lê o fonte do VIctory, o PDB e o PE do runtime compilado, com Ghidra e `dumpbin`, para explicar onde o tempo do quadro vai e o que muda numa build candidata. O alvo é **o runtime** (`victory.exe`, código aberto). O executável do título não é analisado nem citado aqui.
+REA here means assisted reverse engineering. An AI (or you) reads the VIctory source, the PDB and the built runtime's PE, using Ghidra and `dumpbin`. The goal is to explain where frame time goes and what changes in a candidate build. The target is **the runtime** (`victory.exe`, open source). The title's executable is neither analyzed nor quoted here.
 
-| Capítulo | Conteúdo |
+| Chapter | Contents |
 |---|---|
-| [1. Ambiente](01-ambiente.md) | Pastas fora do repositório, firewall offline, build, Agility SDK, hashes |
-| [2. Identidade da build](02-identidade.md) | SHA-256, PDB GUID/age, RVA × VA, como conferir que você analisa o binário certo |
-| [3. Do fonte ao PE](03-fonte-pdb-pe.md) | Fluxo fonte → PDB → PE com Ghidra e `dumpbin`, e o que pode ser publicado |
-| [4. Medir](04-medir.md) | Linhas do log, contadores `VICTORY_*`, protocolo comparável, lock da GPU |
-| [5. Mapa das áreas](05-areas.md) | Por área: símbolos, variáveis e achados já conferidos na candidata 1 |
-| [6. Armadilhas](06-armadilhas.md) | O que já enganou análises anteriores |
-| [Teste automatizado](../harness/README.md) | Launcher, vigia e score |
+| [1. Environment](01-ambiente.md) | Folders outside the repository, offline firewall, build, Agility SDK, hashes |
+| [2. Build identity](02-identidade.md) | SHA-256, PDB GUID/age, RVA vs VA, making sure you analyze the right binary |
+| [3. Source to PE](03-fonte-pdb-pe.md) | The source → PDB → PE flow with Ghidra and `dumpbin`, and what may be published |
+| [4. Measuring](04-medir.md) | Log lines, `VICTORY_*` counters, the comparable protocol, the GPU lock |
+| [5. Area map](05-areas.md) | Per area: symbols, variables and findings already checked on candidate 1 |
+| [6. Pitfalls](06-armadilhas.md) | What has misled earlier analyses |
+| [Automated test](../harness/README.md) | Launcher, watcher and score |
 
-## O ciclo em uma página
+## The cycle on one page
 
-1. **Escolher a pergunta.** Uma Issue por tarefa (R00–R15), com uma área cada. Exemplo: "quem espera qual valor da fence depois do readback?"
-2. **Fixar a build.** Hash do exe e GUID/age do PDB. Sem isso, nenhum endereço vale.
-3. **Ler o fonte.** Achar o caminho no Rust (`host.rs`, `queue.rs`, …) e as variáveis `VICTORY_*` que o controlam.
-4. **Conferir no PDB e no PE.** Os símbolos existem? A função foi inlined? O ramo que o fonte sugere está no binário com essa configuração?
-5. **Medir.** Rodar com o launcher e o vigia, com a GPU reservada, e extrair agregados.
-6. **Relatar.** Um PR por tentativa, só com texto: offsets, números agregados e as marcas `[obs-local]`/`[relatado]`/`[estimado]`.
-7. **Consolidar.** A IA consolidadora junta as tentativas numa candidata, roda o teste e publica o score.
+1. **Pick the question.** One Issue per task (R00–R15), each with one area. Example: "who waits for which fence value after the readback?"
+2. **Pin the build.** The exe's hash and the PDB's GUID/age. Without them, no address is valid.
+3. **Read the source.** Find the path in the Rust code (`host.rs`, `queue.rs`, …) and the `VICTORY_*` variables that control it.
+4. **Check the PDB and the PE.** Do the symbols exist? Was the function inlined? Is the branch the source suggests actually in the binary with this configuration?
+5. **Measure.** Run with the launcher and the watcher, with the GPU reserved, and extract aggregates.
+6. **Report.** One PR per attempt, text only: offsets, aggregate numbers and the `[obs-local]`/`[relatado]`/`[estimado]` tags.
+7. **Consolidate.** The consolidating AI merges attempts into a candidate, runs the test and publishes the score.

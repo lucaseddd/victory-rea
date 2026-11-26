@@ -1,41 +1,50 @@
 <#
 .SYNOPSIS
-  Teste automatizado do VIctory: inicia uma rodada, abre o vigia e gera o score.
+  VIctory automated test: starts a run, opens the watcher and produces the score.
 
 .DESCRIPTION
-  Generalizacao do launcher da candidata 4. Nenhum caminho fixo: tudo vem
-  de parametros ou de um harness.toml (veja harness.example.toml).
-  Exige a regra de firewall de saida bloqueada para o runtime e para o
-  titulo (o titulo roda offline). Rode num PowerShell como administrador.
+  Generalized from the candidate 4 launcher. No hard-coded paths: everything
+  comes from parameters or from a harness.toml (see harness.example.toml).
+  Requires a blocking outbound firewall rule for the runtime and for the
+  title (the title runs offline). Run it in PowerShell as administrator.
 
-  Patches de runtime necessarios: veja harness/patches/README.md.
+  Required runtime patches: see harness/patches/README.md.
+  Parameter names are kept in Portuguese for compatibility with earlier
+  runs; harness/README.md explains each one.
 
 .EXAMPLE
-  .\Iniciar-Rodada.ps1 -Config D:\testes\harness.toml -Rapido -MapOnly
+  .\Iniciar-Rodada.ps1 -Config D:\tests\harness.toml -Rapido -MapOnly
 .EXAMPLE
-  .\Iniciar-Rodada.ps1 -Config D:\testes\harness.toml -Rapido -FecharAposJogavelS 120
+  .\Iniciar-Rodada.ps1 -Config D:\tests\harness.toml -Rapido -FecharAposJogavelS 120
 #>
 [CmdletBinding()]
 param(
-    # Arquivo TOML simples (chave = "valor") com runtime_exe, runtime_sha256, title_exe, run_dir.
+    # Simple TOML file (key = 'value') with runtime_exe, runtime_sha256, title_exe, run_dir.
     [string]$Config = '',
     [string]$RuntimeExe = '',
     [string]$RuntimeSha256 = '',
     [string]$TitleExe = '',
-    # Pasta da rodada: logs, cache, data, data-semente. Fica fora do repositorio.
+    # Run folder: logs, cache, data, data-semente. Must be outside the repository.
     [string]$RunDir = '',
-    # Teste rapido: Series S, modo 1280x720 informado ao jogo, Enter automatico, save da semente, score.
+    # Quick test: Series S, 1280x720 mode reported to the game, automatic Enter, seed save, score.
     [switch]$Rapido,
     [ValidateSet('', 'series-x', 'series-s')][string]$Console = '',
+    # Display mode reported to the game (VICTORY_DISPLAY_MODE, e.g. 1280x720). '' = runtime default.
     [string]$DisplayMode = '',
+    # Automatic Enter through the menus until the first 3D scene (VICTORY_KEYS_FILE + Vigiar-Rodada.ps1).
     [switch]$AutoEnter,
     [int]$EnterApos = 20,
     [int]$EnterIntervalo = 6,
+    # Simultaneous DirectStorage reads (VICTORY_DSTORAGE_WORKERS). 0 = default (one per core).
     [ValidateRange(0, 64)][int]$DiscoWorkers = 0,
+    # Close the game N s after F9 (playable). 0 = do not close.
     [int]$FecharAposJogavelS = 0,
     [int]$MaxMinutos = 0,
+    # Do not restore data\ from data-semente\ (continue from the previous run's save).
     [switch]$SemSemente,
+    # Do not open the watcher (no automatic Enter, no score).
     [switch]$SemVigia,
+    # Axes from earlier candidates (defaults = control profile):
     [ValidateSet(0, 1)][int]$Fila = 0,
     [ValidateSet(0, 1)][int]$Worker = 0,
     [ValidateSet(0, 1)][int]$Mips = 1,
@@ -58,7 +67,7 @@ function Read-FlatToml([string]$path) {
         $l = $line.Trim()
         if (-not $l -or $l.StartsWith('#') -or $l.StartsWith('[')) { continue }
         if ($l -match "^([A-Za-z0-9_]+)\s*=\s*(?:'([^']*)'|`"([^`"]*)`")\s*(#.*)?$") {
-            # 'literal' fica como esta; "basica" desfaz o escape de barra invertida.
+            # 'literal' is kept as is; "basic" undoes backslash escaping.
             $map[$matches[1]] = $(if ($null -ne $matches[2] -and $matches[2] -ne '') { $matches[2] } else { $matches[3] -replace '\\\\', '\' })
         }
     }
@@ -73,12 +82,12 @@ if ($Config) {
     if (-not $RunDir)        { $RunDir        = $cfg['run_dir'] }
 }
 foreach ($pair in @(@('RuntimeExe', $RuntimeExe), @('TitleExe', $TitleExe), @('RunDir', $RunDir))) {
-    if (-not $pair[1]) { throw "Falta $($pair[0]) (parametro ou harness.toml)" }
+    if (-not $pair[1]) { throw "Missing $($pair[0]) (parameter or harness.toml)" }
 }
 $RunDir = (Resolve-Path -LiteralPath $RunDir).ProviderPath
-# Nada derivado do jogo pode cair dentro do repositorio.
+# Nothing derived from the game may land inside the repository.
 if ($RunDir.StartsWith($repoRoot, [StringComparison]::OrdinalIgnoreCase)) {
-    throw "RunDir ($RunDir) esta dentro do repositorio. Use uma pasta fora dele."
+    throw "RunDir ($RunDir) is inside the repository. Use a folder outside it."
 }
 
 if ($Rapido) {
@@ -87,28 +96,28 @@ if ($Rapido) {
     if (-not $PSBoundParameters.ContainsKey('AutoEnter')) { $AutoEnter = $true }
 }
 if (-not $Console) { $Console = 'series-x' }
-if ($DisplayMode -and $DisplayMode -notmatch '^\d{3,4}x\d{3,4}$') { throw "DisplayMode invalido: $DisplayMode (use LARGURAxALTURA)" }
+if ($DisplayMode -and $DisplayMode -notmatch '^\d{3,4}x\d{3,4}$') { throw "Invalid DisplayMode: $DisplayMode (use WIDTHxHEIGHT)" }
 
 function Assert-OutboundBlock([string]$ProgramPath) {
     $rules = Get-NetFirewallApplicationFilter -PolicyStore ActiveStore -Program $ProgramPath -ErrorAction SilentlyContinue |
         Get-NetFirewallRule -ErrorAction SilentlyContinue |
         Where-Object { $_.Enabled -eq 'True' -and $_.Direction -eq 'Outbound' -and $_.Action -eq 'Block' -and $_.Profile -eq 'Any' }
     if (-not $rules) {
-        throw "Falta regra de firewall de saida bloqueada (Profile Any) para $ProgramPath. Rode como administrador e crie a regra (veja harness/README.md)."
+        throw "No blocking outbound firewall rule (Profile Any) for $ProgramPath. Run as administrator and create the rule (see harness/README.md)."
     }
 }
 
 foreach ($file in @($RuntimeExe, $TitleExe)) {
-    if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { throw "Executavel ausente: $file" }
+    if (-not (Test-Path -LiteralPath $file -PathType Leaf)) { throw "Missing executable: $file" }
 }
 $exeHash = (Get-FileHash -LiteralPath $RuntimeExe -Algorithm SHA256).Hash
 if ($RuntimeSha256 -and $exeHash -ne $RuntimeSha256.ToUpperInvariant()) {
-    throw "victory.exe com SHA-256 $exeHash, diferente do registrado ($RuntimeSha256)."
+    throw "victory.exe has SHA-256 $exeHash, not the recorded one ($RuntimeSha256)."
 }
-if (Get-Process -Name victory -ErrorAction SilentlyContinue) { throw 'Outra sessao do VIctory esta aberta.' }
+if (Get-Process -Name victory -ErrorAction SilentlyContinue) { throw 'Another VIctory session is already running.' }
 $profiles = @(Get-NetFirewallProfile -PolicyStore ActiveStore)
 if ($profiles.Count -ne 3 -or @($profiles | Where-Object Enabled -ne 'True').Count) {
-    throw 'O Firewall do Windows precisa estar ligado em todos os perfis.'
+    throw 'Windows Firewall must be enabled for all profiles.'
 }
 Assert-OutboundBlock $TitleExe
 Assert-OutboundBlock $RuntimeExe
@@ -119,12 +128,12 @@ $label = '{0}{1}-fila{2}-worker{3}-mips{4}-piso{5}-disco{6}{7}' -f $(if ($Rapido
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
 $logBase = Join-Path $RunDir "$label-$stamp"
 
-# Save igual em toda rodada: data\ volta a ser a copia de data-semente\.
+# Same save on every run: data\ is reset to a copy of data-semente\.
 $semente = Join-Path $RunDir 'data-semente'
 if (-not $SemSemente -and -not $MapOnly) {
-    if (-not (Test-Path -LiteralPath $semente)) { throw "Falta $semente (ou use -SemSemente)" }
+    if (-not (Test-Path -LiteralPath $semente)) { throw "Missing $semente (or use -SemSemente)" }
     robocopy $semente (Join-Path $RunDir 'data') /MIR /COPY:DAT /NFL /NDL /NJH /NJS /NP | Out-Null
-    if ($LASTEXITCODE -ge 8) { throw "Falha ao restaurar o save da semente (robocopy $LASTEXITCODE)" }
+    if ($LASTEXITCODE -ge 8) { throw "Failed to restore the seed save (robocopy $LASTEXITCODE)" }
 }
 
 $keysFile = if ($AutoEnter -and -not $SemVigia -and -not $MapOnly) { "$logBase.teclas.txt" } else { '' }
@@ -202,9 +211,9 @@ try {
         Get-Content -LiteralPath "$logBase.stdout" -Tail 12
         if ($process.ExitCode -ne 0) {
             Get-Content -LiteralPath "$logBase.stderr" -Tail 12
-            throw "Mapeamento falhou com exit code $($process.ExitCode)"
+            throw "Mapping failed with exit code $($process.ExitCode)"
         }
-        Write-Output 'Mapeamento concluido com exit code 0.'
+        Write-Output 'Mapping completed with exit code 0.'
     } elseif (-not $SemVigia) {
         $vigia = @(
             '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', ('"{0}"' -f (Join-Path $harnessDir 'Vigiar-Rodada.ps1')),
@@ -215,7 +224,7 @@ try {
         )
         if ($keysFile) { $vigia += @('-KeysFile', ('"{0}"' -f $keysFile)) }
         Start-Process -FilePath 'powershell.exe' -ArgumentList $vigia -WorkingDirectory $RunDir | Out-Null
-        Write-Output 'Vigia aberto: F9 = jogavel, F10 = marca. Score em <log>.score.md quando o jogo fechar.'
+        Write-Output 'Watcher open: F9 = playable, F10 = mark. Score in <log>.score.md when the game closes.'
     }
 } finally {
     foreach ($key in $previous.Keys) {

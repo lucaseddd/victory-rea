@@ -1,64 +1,64 @@
-# 5. Mapa das áreas
+# 5. Area map
 
-Ponto de partida por área. RVAs e números são da **candidata 1** (`victory.exe` SHA-256 `D29834AE…378D772`, PDB GUID `{59A6A622-1BF5-4FB1-8733-C224125D0A00}` age 1), vêm dos relatórios de 2026-11-26 e estão marcados `[relatado]`. Em outra build, confira de novo.
+A starting point per area. RVAs and numbers are from **candidate 1** (`victory.exe` SHA-256 `D29834AE…378D772`, PDB GUID `{59A6A622-1BF5-4FB1-8733-C224125D0A00}` age 1). They come from the reports of 2026-11-26 and are tagged `[relatado]`. On another build, check them again.
 
-Os números de log vêm de uma rodada do perfil Controle **fora de protocolo** (sem cena identificada nem janela exclusiva). Servem para orientar, não como baseline.
+The log numbers come from one run of the Controle profile **outside the protocol** (no identified scene, no exclusive window). Use them for orientation, not as a baseline.
 
-## Submissão e próximo quadro (R01, label `submissao`)
+## Submission and next frame (R01, label `submission`)
 
-- `frame::wait` (RVA `0x252C40`) gera o token do quadro. `queue::execute` (`0x173BD0`) com `VICTORY_ASYNC_SUBMIT=1` empilha as partes e acorda a thread `victory-submit` (`queue::worker`, `0x173840`).
-- `Host::submit` (`0x2BD070`) atribui `STARTED`, executa as listas na DIRECT e sinaliza `Host.fence`.
-- `victory-relay` (`0x2EB520`) espera a fence, chama `Host::relay_land` (`0x2A8D60`) e só então publica a fence do guest e `FINISHED`.
-- Com `VICTORY_ASYNC_PRESENT=0`, `queue::present` (`0x1765D0`) é síncrono e espera a thread de submissão. [relatado]
+- `frame::wait` (RVA `0x252C40`) produces the frame token. `queue::execute` (`0x173BD0`) with `VICTORY_ASYNC_SUBMIT=1` stacks the parts and wakes the `victory-submit` thread (`queue::worker`, `0x173840`).
+- `Host::submit` (`0x2BD070`) assigns `STARTED`, executes the lists on the DIRECT queue and signals `Host.fence`.
+- `victory-relay` (`0x2EB520`) waits for the fence, calls `Host::relay_land` (`0x2A8D60`) and only then publishes the guest fence and `FINISHED`.
+- With `VICTORY_ASYNC_PRESENT=0`, `queue::present` (`0x1765D0`) is synchronous and waits for the submission thread. [relatado]
 
-## Readback e fence (R02, R05, label `readback`)
+## Readback and fence (R02, R05, label `readback`)
 
-- A fence do guest (`Fence::value`, +0x10) só é publicada no fim de `relay_land`, depois de `card_merge_relay`, `read_backs` e `Late::Write`. `fence::set` está em RVA `0x487D40`, chamado em `0x2AE4E3`. [relatado]
-- `VICTORY_QUEUE2=0`: a cópia de volta roda na DIRECT. `=1`: roda na COPY `second.down` (`Lane::send`, `0x26D170`), com `Wait(host.fence)` antes. [relatado]
-- `QUEUE2=1` não muda só a fila: liga também `BESIDE` (releitura de blocos de 64 KiB), `Second::sent_up` e cria duas filas COPY e três threads. Um A/B de `QUEUE2` mede tudo isso junto. [relatado, R05]
-- No log do Controle (mundo): `relay_wait_card` mediana 163 ms e `settle_wait` 126 ms. [relatado]
+- The guest fence (`Fence::value`, +0x10) is published only at the end of `relay_land`, after `card_merge_relay`, `read_backs` and `Late::Write`. `fence::set` is at RVA `0x487D40`, called at `0x2AE4E3`. [relatado]
+- `VICTORY_QUEUE2=0`: the copy back runs on DIRECT. `=1`: it runs on the COPY queue `second.down` (`Lane::send`, `0x26D170`), preceded by `Wait(host.fence)`. [relatado]
+- `QUEUE2=1` does not only change the queue. It also enables `BESIDE` (re-reading 64 KiB blocks) and `Second::sent_up`, and creates two COPY queues and three threads. An A/B of `QUEUE2` measures all of that together. [relatado, R05]
+- In the Controle log (world): median `relay_wait_card` 163 ms and `settle_wait` 126 ms. [relatado]
 
-## Execução na GPU (R06, label `gpu-exec`)
+## GPU execution (R06, label `gpu-exec`)
 
-- `VICTORY_LATE_WAIT=1` faz o ramo adiantado (`ExecuteCommandLists` + `Signal` sem espera) ser o padrão.
-- A DIRECT espera a COPY na GPU (`Second::hold`), e o present faz uma cópia serial do quadro para o back buffer.
-- Falta medir com timestamps por fila (R03). [relatado]
+- `VICTORY_LATE_WAIT=1` makes the early branch (`ExecuteCommandLists` + `Signal` without waiting) the default.
+- DIRECT waits for COPY on the GPU (`Second::hold`), and present does a serial copy of the frame to the back buffer.
+- Still to measure with per-queue timestamps (R03). [relatado]
 
-## VRAM e mipmaps (R07, label `vram-mips`)
+## VRAM and mipmaps (R07, label `vram-mips`)
 
-- `resource::room_with_memory` (`0x283190`): abaixo do piso, as texturas do título são criadas sem consultar o orçamento. Acima dele, só com uso < 90% do orçamento. O PR #45 troca o piso fixo de 2 GiB por `min(2 GiB, orçamento/4)`. [relatado]
-- `targets_room_kept` reserva 3 GiB para render targets e cortou a criação de texturas com só 46% do orçamento em uso. [relatado]
-- `tiles::show_from` (`0x488A10`) ajusta `MostDetailedMip` preservando o `ResourceMinLODClamp`. Com `VICTORY_TILES_SMALL_WHEN_FULL_MB=0`, 22–62 texturas tiled ficaram sem nenhum nível (pretas). [relatado]
+- `resource::room_with_memory` (`0x283190`): below the floor, the title's textures are created without checking the budget; above it, only while usage is < 90% of the budget. PR #45 replaces the fixed 2 GiB floor with `min(2 GiB, budget/4)`. [relatado]
+- `targets_room_kept` reserves 3 GiB for render targets and stopped texture creation with only 46% of the budget in use. [relatado]
+- `tiles::show_from` (`0x488A10`) adjusts `MostDetailedMip` while preserving `ResourceMinLODClamp`. With `VICTORY_TILES_SMALL_WHEN_FULL_MB=0`, 22–62 tiled textures had no level at all (black). [relatado]
 
-## Worker de texturas (R08, label `texturas`)
+## Texture worker (R08, label `textures`)
 
-- `VICTORY_HEAP_WORKER=1` move o upload para a thread `victory-heap` (`heap_worker::worker`, `0x1A87C0`). As listas resultantes entram na **DIRECT** antes das do título, não na COPY. [relatado]
-- Sem o worker, `heap_textures` levou mediana de 15 ms e p95 de 74 ms na thread de gravação. [relatado]
+- `VICTORY_HEAP_WORKER=1` moves uploads to the `victory-heap` thread (`heap_worker::worker`, `0x1A87C0`). The resulting lists go to **DIRECT** ahead of the title's, not to COPY. [relatado]
+- Without the worker, `heap_textures` took a median of 15 ms and a p95 of 74 ms on the recording thread. [relatado]
 
 ## DirectStorage (R09, label `directstorage`)
 
-- 16 workers (um por núcleo), staging de 32 MiB e `read_into` (`0x133BF0`) sem coalescimento. [relatado]
-- Num HD SATA, o loading fica preso no disco: de 2,5 a 6 MB/s em leituras de ~16 KB, com só 2–5% contíguas. Coalescer não compensa. [relatado, candidata 4]
-- Use o patch 01 (`VICTORY_DSTORAGE_STATS`) para medir e o patch 05 (`VICTORY_DSTORAGE_WORKERS`) para testar menos leituras simultâneas.
+- 16 workers (one per core), 32 MiB of staging, and `read_into` (`0x133BF0`) without coalescing. [relatado]
+- On a SATA HDD, loading is disk-bound: 2.5 to 6 MB/s in reads of ~16 KB, with only 2–5% contiguous. Coalescing does not pay off. [relatado, candidate 4]
+- Use patch 01 (`VICTORY_DSTORAGE_STATS`) to measure and patch 05 (`VICTORY_DSTORAGE_WORKERS`) to try fewer simultaneous reads.
 
-## Threads e esperas (R10, label `threads-sync`)
+## Threads and waits (R10, label `threads-sync`)
 
-- No mundo, a thread de render ficou ~96% bloqueada. A DIRECT ficou ociosa ~443 ms por quadro de ~782 ms. [relatado]
-- Maiores esperas: PSOs em `pipeline::make::wait` (~500 ms/quadro), o mutex `HostHeap::mirror` com `VICTORY_HEAP_LOCKS=0`, e `settle` por `WHY_STALE`. [relatado]
-- `MWAITX` não apareceu em nenhuma linha do log. Só investigue se os dados apontarem. [relatado]
+- In the world, the render thread was ~96% blocked. DIRECT sat idle ~443 ms per ~782 ms frame. [relatado]
+- Largest waits: PSOs in `pipeline::make::wait` (~500 ms/frame), the `HostHeap::mirror` mutex with `VICTORY_HEAP_LOCKS=0`, and `settle` on `WHY_STALE`. [relatado]
+- `MWAITX` did not show up in any log line. Investigate it only if the data points there. [relatado]
 
-## Shaders e PSOs (R11, label `shaders`)
+## Shaders and PSOs (R11, label `shaders`)
 
-- O primeiro draw chama `make::ready` (`0x1FB280`), que espera até `VICTORY_PIPELINE_WAIT_MS=500` ms por tick. Num quadro que cruza dois ticks, isso chega a ~1 s. [relatado]
-- Cache frio: `wait_for_pipelines` ~500 ms em todas as janelas de mundo. Com o cache quente da referência, 0 ms na mediana e 9,6 ms no p95. [relatado]
-- O cache de shaders é chaveado pela impressão do tradutor (`translation_fingerprint`), não pelo hash do exe. Dá para reaproveitar o cache entre candidatas quando o tradutor for idêntico (confira por hash). [relatado]
+- The first draw calls `make::ready` (`0x1FB280`), which waits up to `VICTORY_PIPELINE_WAIT_MS=500` ms per tick. A frame that spans two ticks can reach ~1 s. [relatado]
+- Cold cache: `wait_for_pipelines` ~500 ms in every world window. With the reference's warm cache: 0 ms median and 9.6 ms p95. [relatado]
+- The shader cache is keyed by the translator's fingerprint (`translation_fingerprint`), not the exe hash. You can reuse the cache across candidates when the translator is identical (check by hash). [relatado]
 
-## Present e pacing (R12, label `present`)
+## Present and pacing (R12, label `present`)
 
-- O FPS da meta conta Presents DXGI (`Meter::frame`, `host.rs`), com `FLIP_DISCARD`, 2 buffers e `SyncInterval=0`. Ele mistura quadros de mundo com quadros de menu e loading. [relatado]
-- Com `--console series-s`, o título apresenta dois planos. Sem o patch 03, só a cena aparece e a interface sai preta.
+- The goal's FPS counts DXGI Presents (`Meter::frame`, `host.rs`), with `FLIP_DISCARD`, 2 buffers and `SyncInterval=0`. It mixes world frames with menu and loading frames. [relatado]
+- With `--console series-s`, the title presents two planes. Without patch 03, only the scene shows and the interface comes out black.
 
-## Regressões de imagem (R13, label `image-regression`)
+## Image regressions (R13, label `image-regression`)
 
-- Cutscene preta na candidata 1: o piso `orçamento/4` do PR #45 segurou as texturas do título em ~849 MB (mediana), contra 1.921 MB na referência. As superfícies ficaram sem cor base. O patch 02 torna o PR #45 opt-in. [relatado]
-- O log da build `diagnostics` marca `a black frame after a frame that was not`, um bom gatilho automático.
+- Black cutscene on candidate 1: PR #45's `budget/4` floor held the title's textures at ~849 MB (median), against 1,921 MB on the reference. Surfaces lost their base color. Patch 02 makes PR #45 opt-in. [relatado]
+- A `diagnostics` build logs `a black frame after a frame that was not`, a good automatic trigger.

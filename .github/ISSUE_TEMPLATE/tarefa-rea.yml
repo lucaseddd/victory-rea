@@ -1,24 +1,24 @@
-name: Tarefa REA
-description: Uma tarefa do quadro (R00–R15). O titular é o assignee.
+name: REA task
+description: One task from the board (R00–R15). The holder is the assignee.
 title: "R??: "
-labels: ["tarefa", "estado:aberta"]
+labels: ["task", "status:open"]
 body:
   - type: markdown
     attributes:
       value: |
-        Uma Issue por tarefa. Antes de preencher, leia CONTRIBUTING.md e POLITICA-DE-DADOS.md.
-        Nada do jogo entra aqui: só hash/GUID da build, offsets de funções e números agregados.
+        One Issue per task. Before filling this in, read CONTRIBUTING.md and POLITICA-DE-DADOS.md (data policy).
+        Nothing from the game goes here: only the build's hash/GUID, function offsets and aggregate numbers.
   - type: input
     id: tarefa
     attributes:
-      label: ID da tarefa
+      label: Task ID
       placeholder: R07
     validations:
       required: true
   - type: dropdown
     id: area
     attributes:
-      label: Área (aplique também a label correspondente)
+      label: Area (also apply the matching label)
       options:
         - readback
         - vram-mips
@@ -26,90 +26,91 @@ body:
         - present
         - shaders
         - image-regression
-        - coordenacao
-        - submissao
-        - instrumentacao
+        - coordination
+        - submission
+        - instrumentation
         - baseline
         - gpu-exec
-        - texturas
+        - textures
         - threads-sync
-        - otimizacao
-        - validacao
+        - optimization
+        - validation
     validations:
       required: true
   - type: dropdown
     id: prioridade
     attributes:
-      label: Prioridade
+      label: Priority
       options: ["P0", "P1", "P2"]
     validations:
       required: true
   - type: textarea
     id: escopo
     attributes:
-      label: Escopo e critério de pronto
-      description: O que a tarefa entrega e como saber que terminou.
+      label: Scope and definition of done
+      description: What the task delivers and how to tell it is finished.
     validations:
       required: true
   - type: input
     id: build
     attributes:
-      label: Build e hash
-      description: Executável e SHA-256 (ou BLAKE3); PDB GUID/age se houver.
+      label: Build and hash
+      description: Executable and SHA-256 (or BLAKE3); PDB GUID/age if available.
       placeholder: "victory.exe sha256 d29834ae…378d772 · PDB GUID {…} age 1"
     validations:
       required: true
   - type: input
     id: cena
     attributes:
-      label: Cena e checkpoints
-      placeholder: "C1 cutscene, M1 primeira missão · ou: análise estática"
+      label: Scene and checkpoints
+      placeholder: "C1 cutscene, M1 first mission · or: static analysis"
     validations:
       required: true
   - type: input
     id: perfil
     attributes:
-      label: Perfil efetivo
-      description: Perfil, variáveis VICTORY_* que diferem, resolução, escala, cache frio/quente.
-      placeholder: "Controle · VICTORY_QUEUE2=0 · 1080p · cache frio"
+      label: Effective profile
+      description: Profile, VICTORY_* variables that differ, resolution, scale, cold/warm cache.
+      placeholder: "Controle · VICTORY_QUEUE2=0 · 1080p · cold cache"
     validations:
       required: true
   - type: textarea
     id: metricas
     attributes:
-      label: Métricas atuais
-      description: FPS renderizado, mediana, p95, % > 33,33 ms, travamentos, VRAM. Use "indisponível" quando não houver medição.
+      label: Current metrics
+      description: Rendered FPS, median, p95, % > 33.33 ms, hitches, VRAM, score. Write "unavailable" when there is no measurement.
       value: |
-        | Métrica | Valor | Marca |
+        | Metric | Value | Tag |
         |---|---|---|
-        | FPS renderizado | indisponível | |
-        | Mediana ms / p95 ms | indisponível | |
-        | % > 33,33 ms | indisponível | |
-        | VRAM típica / pico MB | indisponível | |
+        | Rendered FPS | unavailable | |
+        | Median ms / p95 ms | unavailable | |
+        | % > 33.33 ms | unavailable | |
+        | Typical / peak VRAM MB | unavailable | |
+        | Harness score | unavailable | |
     validations:
       required: true
   - type: input
     id: dependencias
     attributes:
-      label: Dependências
-      placeholder: "R03 (protocolo) + lock GPU"
+      label: Dependencies
+      placeholder: "R03 (protocol) + GPU lock"
   - type: textarea
     id: estado
     attributes:
-      label: Estado (mantido pelo titular)
+      label: Status (kept up to date by the holder)
       value: |
-        - Estado: aberta
-        - Progresso: 0%
-        - Bloqueio:
-        - Próximo passo:
+        - State: open
+        - Progress: 0%
+        - Blocker:
+        - Next step:
     validations:
       required: true
   - type: checkboxes
     id: regras
     attributes:
-      label: Conferência
+      label: Checks
       options:
-        - label: Todo número está marcado como [obs-local], [relatado] ou [estimado]
+        - label: Every number is tagged [obs-local], [relatado] (reported) or [estimado] (estimated)
           required: true
-        - label: Não há asset, binário, log bruto, captura, disassembly do título nem dado pessoal nesta Issue
+        - label: This Issue contains no asset, binary, raw log, capture, disassembly of the title or personal data
           required: true

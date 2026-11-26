@@ -1,10 +1,10 @@
-# VICTORY_TEXTURE_FLOOR_MB e AUTO_VRAM desligado por padrão
+# VICTORY_TEXTURE_FLOOR_MB, and AUTO_VRAM off by default
 
-Candidata 3, correção da cutscene preta (R13). O orçamento de texturas pela VRAM (PR #45) só liga com `VICTORY_TEXTURE_AUTO_VRAM=1`. `VICTORY_TEXTURE_FLOOR_MB` define o piso direto, e uma linha no início do log informa o piso efetivo. O `-PisoTexturasMB` do launcher usa esse patch.
+Candidate 3, the fix for the black cutscene (R13). The VRAM-based texture budget (PR #45) is only enabled with `VICTORY_TEXTURE_AUTO_VRAM=1`. `VICTORY_TEXTURE_FLOOR_MB` sets the floor directly, and a line at the start of the log reports the effective floor. The launcher's `-PisoTexturasMB` uses this patch.
 
-- **Aplicar em ordem**, sobre `fxceless/victory-fork` no commit `f6a09d3b` com o PR #45 (candidata 1). Os números de linha dos hunks seguem essa cadeia.
-- Licença: o VIctory e o fork são GPL-3.0. Este diff é derivado desse código e segue a mesma licença.
-- Para aplicar: copie o bloco `diff` para `02-texture-floor.patch` e rode `git apply --check 02-texture-floor.patch`, depois `git apply 02-texture-floor.patch`.
+- **Apply in order**, on top of `fxceless/victory-fork` at commit `f6a09d3b` with PR #45 (candidate 1). Hunk line numbers follow that chain.
+- License: VIctory and the fork are GPL-3.0. This diff derives from that code and is under the same license.
+- To apply: copy the `diff` block to `02-texture-floor.patch`, run `git apply --check 02-texture-floor.patch`, then `git apply 02-texture-floor.patch`.
 
 ## `crates/victory-gpu/src/draw.rs`
 

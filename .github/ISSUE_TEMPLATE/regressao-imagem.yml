@@ -1,65 +1,65 @@
-name: Regressão de imagem
-description: Diferença de imagem entre uma candidata e a referência local. Só números, nenhuma imagem.
-title: "Regressão: "
-labels: ["image-regression", "estado:aberta"]
+name: Image regression
+description: An image difference between a candidate and the local reference. Numbers only, no images.
+title: "Regression: "
+labels: ["image-regression", "status:open"]
 body:
   - type: markdown
     attributes:
       value: |
-        Não anexe screenshots nem vídeos. Descreva em palavras e informe a métrica da comparação local.
+        Do not attach screenshots or videos. Describe what you see in words and give the metric from the local comparison.
   - type: input
     id: build
     attributes:
-      label: Build e hash (com regressão)
+      label: Build and hash (with the regression)
       placeholder: "victory.exe sha256 …"
     validations:
       required: true
   - type: input
     id: referencia
     attributes:
-      label: Build de referência e hash
+      label: Reference build and hash
       placeholder: "victory.exe sha256 84996d18…f563e"
     validations:
       required: true
   - type: input
     id: cena
     attributes:
-      label: Cena e checkpoint
+      label: Scene and checkpoint
       placeholder: "C1 cutscene, checkpoint 3"
     validations:
       required: true
   - type: input
     id: perfil
     attributes:
-      label: Perfil efetivo
-      placeholder: "Controle · VICTORY_TEXTURE_AUTO_VRAM=1 · cache quente"
+      label: Effective profile
+      placeholder: "Controle · VICTORY_TEXTURE_AUTO_VRAM=1 · warm cache"
     validations:
       required: true
   - type: textarea
     id: descricao
     attributes:
-      label: O que se vê (em palavras)
-      placeholder: "Cena 3D toda preta; HUD e legendas aparecem."
+      label: What you see (in words)
+      placeholder: "The 3D scene is fully black; HUD and subtitles show."
     validations:
       required: true
   - type: textarea
     id: metricas
     attributes:
-      label: Métricas da comparação
+      label: Comparison metrics
       value: |
-        | Métrica | Candidata | Referência | Marca |
+        | Metric | Candidate | Reference | Tag |
         |---|---|---|---|
-        | Similaridade com a referência (ex.: SSIM) | | | |
-        | % de pixels pretos | | | |
-        | FPS / mediana ms | | | |
+        | Similarity to the reference (e.g. SSIM) | | | |
+        | % black pixels | | | |
+        | FPS / median ms | | | |
     validations:
       required: true
   - type: checkboxes
     id: regras
     attributes:
-      label: Conferência
+      label: Checks
       options:
-        - label: Todo número está marcado como [obs-local], [relatado] ou [estimado]
+        - label: Every number is tagged [obs-local], [relatado] (reported) or [estimado] (estimated)
           required: true
-        - label: Nenhuma imagem, vídeo, captura ou asset foi anexado
+        - label: No image, video, capture or asset is attached
           required: true

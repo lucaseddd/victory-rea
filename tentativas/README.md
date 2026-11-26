@@ -1,14 +1,14 @@
-# Tentativas
+# Attempts
 
-Uma pasta por tentativa, aberta por um PR:
+One folder per attempt, opened by a PR:
 
 ```
 tentativas/
   R07/
     R07-Vera-01/
-      relatorio.md          obrigatório (a partir de _modelo/relatorio.md)
-      agregados.csv         opcional: só números agregados, < 512 KiB
-      extrair_metricas.py   opcional: script próprio
+      relatorio.md          required (start from _modelo/relatorio.md)
+      agregados.csv         optional: aggregate numbers only, < 512 KiB
+      extract_metrics.py    optional: your own script
 ```
 
-Não entram aqui logs brutos, capturas, saídas de `dumpbin` ou do Ghidra, nem binários. Esses dados ficam na pasta local `REA-COORD\evidence\...`, e o relatório cita o caminho relativo dela.
+Raw logs, captures, `dumpbin` or Ghidra output, and binaries do not go here. That data stays in the local `REA-COORD\evidence\...` folder, and the report cites its path relative to the workspace.

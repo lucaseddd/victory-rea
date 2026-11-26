@@ -1,48 +1,48 @@
-# 1. Ambiente
+# 1. Environment
 
-## Onde cada coisa fica
+## Where everything lives
 
 ```
-<workspace local>\               fora do repositório
-  victory-fork-<commit>\         fonte do runtime (git do fork)
-  cand<N>\                       cópia do fonte com os patches da candidata N
-  cand<N>-dist\victory.exe       build compilada (+ victory.pdb, D3D12\)
-  cand<N>-run\                   rodadas: logs, cache, data, data-semente
-  REA-COORD\evidence\...         dados brutos de cada tentativa
-<este repositório>\              só texto: guia, harness, relatórios
+<local workspace>\               outside the repository
+  victory-fork-<commit>\         runtime source (fork's git)
+  cand<N>\                       copy of the source with candidate N's patches
+  cand<N>-dist\victory.exe       built binary (+ victory.pdb, D3D12\)
+  cand<N>-run\                   runs: logs, cache, data, data-semente
+  REA-COORD\evidence\...         raw data for each attempt
+<this repository>\               text only: guide, harness, reports
 ```
 
-Regras:
+Rules:
 
-- **Uma pasta por candidata.** Nunca recompile em cima de uma candidata já medida. Copie o fonte, aplique a mudança e compile em `cand<N+1>`.
-- **O dump do título fica em leitura.** Ninguém escreve nele.
-- **Derivados fora do repositório.** Cache de shaders, pipelines, saves, capturas e logs ficam na pasta da rodada. O launcher do harness recusa uma pasta de rodada dentro do repositório.
+- **One folder per candidate.** Never rebuild on top of a candidate that has already been measured. Copy the source, apply the change and build into `cand<N+1>`.
+- **The title dump is read-only.** Nobody writes to it.
+- **Derived data outside the repository.** Shader and pipeline caches, saves, captures and logs stay in the run folder. The harness launcher refuses a run folder inside the repository.
 
 ## Offline
 
-O título roda sem rede. Antes da primeira rodada de cada exe novo, crie a regra de saída bloqueada (PowerShell como administrador):
+The title runs without network access. Before the first run of each new exe, create the blocking outbound rule (PowerShell as administrator):
 
 ```powershell
-New-NetFirewallRule -DisplayName 'VIctory runtime offline' -Direction Outbound -Action Block -Profile Any -Program '<caminho do victory.exe>'
+New-NetFirewallRule -DisplayName 'VIctory runtime offline' -Direction Outbound -Action Block -Profile Any -Program '<path to victory.exe>'
 ```
 
-O launcher confere se o firewall está ligado nos três perfis e se há uma regra de bloqueio para o runtime e outra para o título. Como ler as regras exige elevação, sem administrador ele para com "Acesso negado". Isso é esperado: não contorne.
+The launcher checks that the firewall is on in all three profiles and that there is one blocking rule for the runtime and another for the title. Reading the rules requires elevation, so without administrator rights it stops with "Access denied". That is expected: do not work around it.
 
-## Compilar
+## Building
 
 ```powershell
 cargo rustc --offline --locked --release --features diagnostics -p victory --bin victory -- -C "link-arg=/EXPORT:D3D12SDKPath,DATA" -C "link-arg=/EXPORT:D3D12SDKVersion,DATA"
 ```
 
-- `--features diagnostics` liga o `VICTORY_KEYS`, o `VICTORY_KEYS_FILE`, a detecção de quadro preto e outros auxílios.
-- Os exports ativam o Agility SDK de `D3D12\` ao lado do exe. Confira com `dumpbin /exports victory.exe`.
-- Fixe o toolchain (`cargo +<versão>`) e anote a versão no relatório da build.
-- Rode os testes do crate que você mudou (`cargo test -p victory-gpu`, `-p victory-hle`). Falhas antigas, presentes em todas as árvores, entram no relatório como "falha antiga", com o nome do teste.
+- `--features diagnostics` enables `VICTORY_KEYS`, `VICTORY_KEYS_FILE`, black-frame detection and other aids.
+- The exports activate the Agility SDK in `D3D12\` next to the exe. Check with `dumpbin /exports victory.exe`.
+- Pin the toolchain (`cargo +<version>`) and record the version in the build report.
+- Run the tests of the crate you changed (`cargo test -p victory-gpu`, `-p victory-hle`). Old failures that are present in every tree go in the report as "old failure", with the test name.
 
-## Antes de executar
+## Before running
 
 ```powershell
 .\harness\Iniciar-Rodada.ps1 -Config .\harness\harness.toml -MapOnly
 ```
 
-O `-MapOnly` mapeia o título sem executar: confere o hash, o firewall e os imports faltando. Exit 0 com 0 imports faltando é o mínimo para pedir a GPU.
+`-MapOnly` maps the title without running it, checking the hash, the firewall and missing imports. Exit 0 with 0 missing imports is the minimum before asking for the GPU.
