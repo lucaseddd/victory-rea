@@ -127,6 +127,48 @@ def main() -> int:
         print(json.dumps(row))
     if cap_eval:
         print("Local capture slice gate check (aggregate only):", json.dumps(cap_eval))
+    # Also evaluate build-next-rea (77b6124f...) Integrado (cold shader cache) vs BuffersVRAM (warm shader cache)
+    next_dir = WORKSPACE / "build-next-rea" / "run"
+    integ_log = next_dir / "Integrado-20261126-091241-832.stderr"
+    buf_log = next_dir / "BuffersVRAM-20261126-094849-762.stderr"
+    if integ_log.is_file() and buf_log.is_file():
+        integ = score_run(
+            integ_log,
+            RunMetadata(
+                exe_name="victory.exe",
+                exe_sha256="77b6124fa673ebb0d32e9b92fadbb0691bc3d2d3c21ecf4186d8287df2edd9b8",
+                pdb_guid="14F11B44E861429C850B936ADEAF6A88",
+                pdb_age=1,
+                console="series-s",
+                display_mode="1280x720",
+                render_scale=1.0,
+                frame_generation=False,
+                cache_state="cold",
+                checkpoint="C1",
+                profile_name="Integrado-256MB",
+            ),
+        )
+        bufv = score_run(
+            buf_log,
+            RunMetadata(
+                exe_name="victory.exe",
+                exe_sha256="77b6124fa673ebb0d32e9b92fadbb0691bc3d2d3c21ecf4186d8287df2edd9b8",
+                pdb_guid="14F11B44E861429C850B936ADEAF6A88",
+                pdb_age=1,
+                console="series-s",
+                display_mode="1280x720",
+                render_scale=1.0,
+                frame_generation=False,
+                cache_state="warm",
+                checkpoint="C1",
+                profile_name="BuffersVRAM-512MB",
+            ),
+        )
+        cmp_cache = compare_runs_v2(bufv, integ)
+        print("build-next-rea Integrado(cold) vs BuffersVRAM(warm):", cmp_cache["verdict"], cmp_cache["mismatches"])
+        print("  Integrado:", integ["timing"]["rendered_fps"], "FPS, med", integ["timing"]["median_ms"], "ms, p95", integ["timing"]["p95_ms"], "ms, cache=", integ["observed_cache"])
+        print("  BuffersVRAM:", bufv["timing"]["rendered_fps"], "FPS, med", bufv["timing"]["median_ms"], "ms, p95", bufv["timing"]["p95_ms"], "ms, cache=", bufv["observed_cache"])
+
     return 0
 
 

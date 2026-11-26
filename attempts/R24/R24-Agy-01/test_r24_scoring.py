@@ -287,6 +287,44 @@ class R24ScoringTests(unittest.TestCase):
             self.assertEqual(cmp_inv["verdict"], "INVALID_COMPARISON")
             self.assertFalse(cmp_inv["comparable"])
 
+    def test_detects_cache_state_contradiction_and_splits_c1_m1_checkpoints(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            tmp = Path(td)
+            log = tmp / "c1_m1.stderr"
+            log.write_text(
+                """\
+2026-11-26T12:00:00Z INFO victory_gpu::queue: shaders from the cache and translated so far hits=0 misses=200
+2026-11-26T12:01:00Z INFO victory_gpu::host: 10.0 fps, 100.0 ms/frame (5.0 preparing: copies 1.0 ms 1.0 MB, textures 1.0 ms 1.0 MB; 50.0 on the GPU; 1.0 copying back 0.1 MB), 3200 draws/frame, dropped 10 without a host pipeline (0 being made) and 1 indirect
+2026-11-26T12:01:00Z INFO victory_gpu::framelog: frame times: 5 frames in 0.5 s: shortest 95 ms, median 100, longest 110; 0 long (over 200 ms, the usual frame of the last 64 being 100); each: 95 100 100 105 110
+2026-11-26T12:01:00Z INFO victory_gpu::framelog: frames by kind: 5 of the world (6 or more host submissions) in 0.5 s: mean 102 ms, 9.80 a second while they ran; 0 menu or loading frames (fewer submissions) in 0.0 s: mean 0 ms
+2026-11-26T12:03:00Z INFO victory_gpu::framelog: frame times: 5 frames in 0.2 s: shortest 30 ms, median 32, longest 33; 0 long (over 70 ms, the usual frame of the last 64 being 32); each: 30 31 32 33 32
+2026-11-26T12:03:00Z INFO victory_gpu::framelog: frames by kind: 5 of the world (6 or more host submissions) in 0.2 s: mean 31 ms, 31.65 a second while they ran; 0 menu or loading frames (fewer submissions) in 0.0 s: mean 0 ms
+""",
+                encoding="utf-8",
+            )
+            # Declaring warm when log shows hits=0 misses=200 must fail cache_state_mismatch
+            wrong_cache = score_run(log, base_meta(cache_state="warm"))
+            self.assertEqual(wrong_cache["observed_cache"]["detected_state"], "cold")
+            self.assertTrue(
+                any(
+                    "cache_state_mismatch" in f
+                    for f in wrong_cache["gates"]["workload_and_render"]["anti_gaming_failures"]
+                )
+            )
+            # Declaring cold with C1+M1 split at autosave=120s segments C1 (100ms) and M1 (32ms)
+            split_res = score_run(
+                log,
+                base_meta(cache_state="cold", checkpoint="C1+M1"),
+                enter_accepted_s=30.0,
+                first_3d_scene_s=50.0,
+                save_events_s=[12.0, 120.0],
+            )
+            self.assertEqual(split_res["checkpoints"]["C1"]["status"], "measured")
+            self.assertEqual(split_res["checkpoints"]["C1"]["median_ms"], 100.0)
+            self.assertEqual(split_res["checkpoints"]["M1"]["status"], "measured")
+            self.assertEqual(split_res["checkpoints"]["M1"]["median_ms"], 32.0)
+            self.assertEqual(split_res["checkpoints"]["M1"]["rendered_fps"], 31.25)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

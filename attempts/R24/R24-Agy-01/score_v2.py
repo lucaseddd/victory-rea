@@ -15,11 +15,13 @@ import statistics
 import struct
 import zlib
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 SCHEMA_VERSION = "2.0.0"
 ANSI_RE = re.compile(r"\x1b\[[0-?]*[ -/]*[@-~]")
+TIMESTAMP_RE = re.compile(r"^(\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z)\b")
 METER_RE = re.compile(
     r"(?P<fps>\d+(?:\.\d+)?) fps, (?P<ms>\d+(?:\.\d+)?) ms/frame "
     r"\((?P<prepare>\d+(?:\.\d+)?) preparing:.*?; (?P<gpu_wait>\d+(?:\.\d+)?) on the GPU; "
@@ -38,6 +40,10 @@ REFUSED_RE = re.compile(r"without a host pipeline: refused \[(\w+) ([0-9a-fA-F]+
 PRESENT_LINE_RE = re.compile(
     r"frame=(\d+) draws=(\d+) drawn=(\d+) dispatches=(\d+) dispatched=(\d+)"
 )
+SHADER_CACHE_RE = re.compile(
+    r"shaders from the cache and translated so far hits=(\d+) misses=(\d+)"
+)
+PIPELINES_LOG_RE = re.compile(r"pipelines:\s*(\d+) made,\s*(\d+) loaded")
 GPU_LOST_RE = re.compile(r"device (?:removed|lost|hung)|DEVICE_REMOVED")
 
 WEIGHTS_V2 = {
@@ -459,6 +465,31 @@ def parse_display_dims(mode: str) -> tuple[int, int] | None:
     return int(m.group(1)), int(m.group(2))
 
 
+def summarize_frame_times(ms_list: list[float]) -> dict[str, Any]:
+    if not ms_list:
+        return {
+            "status": "unavailable",
+            "frames": 0,
+            "rendered_fps": None,
+            "median_ms": None,
+            "p95_ms": None,
+            "pct_over_33_33ms": None,
+            "hitches_1s": 0,
+        }
+    med = median_or_none(ms_list)
+    return {
+        "status": "measured",
+        "frames": len(ms_list),
+        "rendered_fps": round(1000.0 / med, 2) if med and med > 0 else None,
+        "median_ms": round(med, 2) if med is not None else None,
+        "p95_ms": round(percentile(ms_list, 95.0), 2),
+        "pct_over_33_33ms": round(
+            100.0 * sum(1 for x in ms_list if x > 33.33) / len(ms_list), 2
+        ),
+        "hitches_1s": sum(1 for x in ms_list if x > 1000.0),
+    }
+
+
 def score_run(
     log_path: Path,
     meta: RunMetadata,
@@ -472,9 +503,11 @@ def score_run(
     save_events_s: list[float] | None = None,
     enter_accepted_s: float | None = None,
     first_3d_scene_s: float | None = None,
+    m1_start_s: float | None = None,
     scene_measured_ok: bool = False,
     first_frame_s: float | None = None,
 ) -> dict[str, Any]:
+    pure_world_records: list[tuple[float | None, float]] = []
     pure_world_ms: list[float] = []
     mixed_ms: list[float] = []
     pure_menu_ms: list[float] = []
@@ -491,18 +524,32 @@ def score_run(
     vram_shared: list[int] = []
     refused_pipelines: set[str] = set()
     shaders_translated = 0
+    shader_cache_hits: int | None = None
+    shader_cache_misses: int | None = None
+    pipelines_made = 0
+    pipelines_loaded = 0
     black_runtime = 0
     gpu_lost = 0
     zero_draw_presents = 0
     total_present_lines = 0
 
+    origin_dt: datetime | None = None
     last_each: list[float] | None = None
+    last_each_elapsed: float | None = None
     with log_path.open(encoding="utf-8", errors="replace") as fh:
         for raw in fh:
             s = ANSI_RE.sub("", raw)
+            elapsed_s: float | None = None
+            ts_m = TIMESTAMP_RE.match(s.lstrip("\x00"))
+            if ts_m:
+                dt = datetime.fromisoformat(ts_m.group(1))
+                if origin_dt is None:
+                    origin_dt = dt
+                elapsed_s = (dt - origin_dt).total_seconds()
             mf = FRAMELOG_TIMES_RE.search(s)
             if mf:
                 last_each = [float(x) for x in mf.group(1).split()]
+                last_each_elapsed = elapsed_s
                 continue
             mk = FRAMELOG_KINDS_RE.search(s)
             if mk and last_each is not None:
@@ -513,6 +560,8 @@ def score_run(
                 if w > 0 and m == 0:
                     pure_world_windows += 1
                     pure_world_ms.extend(last_each)
+                    for val in last_each:
+                        pure_world_records.append((last_each_elapsed, val))
                 elif w > 0 and m > 0:
                     mixed_windows += 1
                     mixed_ms.extend(last_each)
@@ -520,6 +569,7 @@ def score_run(
                     pure_menu_windows += 1
                     pure_menu_ms.extend(last_each)
                 last_each = None
+                last_each_elapsed = None
                 continue
             mm = METER_RE.search(s)
             if mm:
@@ -548,6 +598,12 @@ def score_run(
                 vram_used.append(int(mv.group("used")))
                 vram_budget.append(int(mv.group("budget")))
                 vram_shared.append(int(mv.group("shared")))
+            elif msc := SHADER_CACHE_RE.search(s):
+                shader_cache_hits = int(msc.group(1))
+                shader_cache_misses = int(msc.group(2))
+            elif mpl := PIPELINES_LOG_RE.search(s):
+                pipelines_made += int(mpl.group(1))
+                pipelines_loaded += int(mpl.group(2))
             elif "shader translated" in s:
                 shaders_translated += 1
             elif mr := REFUSED_RE.search(s):
@@ -568,6 +624,36 @@ def score_run(
         after = [t for t in save_events_s if t >= gate_t]
         if after:
             valid_autosave_s = round(after[0], 2)
+
+    # Observed cache state from runtime counters
+    if shader_cache_hits is not None:
+        if shader_cache_hits == 0 and (shader_cache_misses or 0) > 0:
+            detected_cache_state = "cold"
+        elif shader_cache_hits > 0:
+            detected_cache_state = "warm"
+        else:
+            detected_cache_state = "unknown"
+    elif shaders_translated > 0:
+        detected_cache_state = "cold"
+    else:
+        detected_cache_state = "unknown"
+
+    # C1 / M1 checkpoint split
+    split_t = m1_start_s if m1_start_s is not None else valid_autosave_s
+    if meta.checkpoint == "M1":
+        c1_ms: list[float] = []
+        m1_ms: list[float] = list(pure_world_ms)
+    elif split_t is not None and any(t is not None for t, _ in pure_world_records):
+        c1_ms = [v for t, v in pure_world_records if t is None or t < split_t]
+        m1_ms = [v for t, v in pure_world_records if t is not None and t >= split_t]
+    else:
+        c1_ms = list(pure_world_ms)
+        m1_ms = []
+    checkpoints = {
+        "C1": summarize_frame_times(c1_ms),
+        "M1": summarize_frame_times(m1_ms),
+        "world_all": summarize_frame_times(pure_world_ms),
+    }
 
     # Prefer pure-world per-frame framelog timings; fall back to meter_world only if framelog off.
     if pure_world_ms:
@@ -623,6 +709,11 @@ def score_run(
 
     # Anti-gaming and workload gate
     anti_gaming_failures: list[str] = []
+    if detected_cache_state != "unknown" and meta.cache_state != detected_cache_state:
+        anti_gaming_failures.append(
+            f"cache_state_mismatch: declared={meta.cache_state} observed={detected_cache_state} "
+            f"(shader hits={shader_cache_hits}, misses={shader_cache_misses})"
+        )
     if framelog_world_frames == 0 and not meter_world_samples:
         anti_gaming_failures.append("menu_only_samples: zero world frames detected")
     dims = parse_display_dims(meta.display_mode)
@@ -769,8 +860,17 @@ def score_run(
             "render_scale": meta.render_scale,
             "frame_generation": meta.frame_generation,
             "cache_state": meta.cache_state,
+            "observed_cache_state": detected_cache_state,
             "checkpoint": meta.checkpoint,
             "profile_name": meta.profile_name,
+        },
+        "checkpoints": checkpoints,
+        "observed_cache": {
+            "detected_state": detected_cache_state,
+            "shader_hits": shader_cache_hits,
+            "shader_misses": shader_cache_misses,
+            "pipelines_made_samples": pipelines_made,
+            "pipelines_loaded_samples": pipelines_loaded,
         },
         "score_total": weighted,
         "weights": WEIGHTS_V2,
