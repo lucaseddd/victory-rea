@@ -1,0 +1,7 @@
+run,log_lines,first_tiles,last_tiles_alive,last_tiles_made,last_tile_levels,last_tile_mb,census_total_slots,census_shown_ok,census_blank_on_demand,census_blank_no_held_level,phys_page_writes,phys_page_mb,guarded_blocks_opened,plain_addr_reads,plain_addr_action,placed_slots_touched,placed_slots_uploaded_stale,placed_slots_action,tex_changed_warns,texback_landed_logs
+cand4_HW0,24455,3/3/3lv/0MB,1048,1493,1763,121,15907,10022,1,N/A,32786,1222,2440,54066,counted only,938,546,left as they were,200,0
+cand5_v002_HW0,42195,3/3/3lv/0MB,1170,4774,5599,172,17765,12782,52,N/A,102892,5319,17695,104060,counted only,8923,6367,left as they were,212,0
+next_rea_BuffersVRAM,37468,3/3/0lv/0MB,1202,3386,413,62,11341,9942,1162,1162,63243,2612,10321,86140,counted only,3721,3142,left as they were,209,0
+next_rea_Integrado,59938,3/3/0lv/0MB,1069,3995,264,22,13835,9895,1051,1051,92263,4554,14080,90225,counted only,7937,6139,left as they were,227,0
+r27_mouth_Integrado,44611,3/3/0lv/0MB,1192,2508,398,25,11218,9784,1153,1153,61897,3366,15417,75107,counted only,4002,3375,left as they were,211,0
+r27_perf_Fluidez,25978,3/3/0lv/0MB,1305,1508,30,0,13531,8107,1094,1089,30214,1044,1462,54559,counted only,921,800,left as they were,201,0
