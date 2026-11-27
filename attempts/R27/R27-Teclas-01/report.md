@@ -28,8 +28,8 @@ The adaptation of Marvisak/VIctory#3433 (by @imjustprism) redraws the title's ic
 
 ### Other tooling in this attempt
 
-- [Preparar-PC.ps1](Preparar-PC.ps1): closes GPU miners (Kryptex, Salad), browsers, chat and overlays before playing. On this 6 GB card that raised the game's D3D12 budget to 5,228 MB and removed the drops under 3 fps.
-- [Registrar-Sessao.ps1](Registrar-Sessao.ps1): started by the launcher; when the game closes it scores the session 0–100 from its own log (performance 60, stability 25, loading 15), appends it to a CSV and a Markdown history, and archives the build that ran.
+- [Prepare-PC.ps1](Prepare-PC.ps1): closes GPU miners (Kryptex, Salad), browsers, chat and overlays before playing. On this 6 GB card that raised the game's D3D12 budget to 5,228 MB and removed the drops under 3 fps.
+- [Record-Session.ps1](Record-Session.ps1): started by the launcher; when the game closes it scores the session 0–100 from its own log (performance 60, stability 25, loading 15), appends it to a CSV and a Markdown history, and archives the build that ran.
 - Window caption: `Bolinha | fps | mean fps | ms | build | VRAM used/budget | RAM | CPU% | GPU%`.
 
 ## Tested
