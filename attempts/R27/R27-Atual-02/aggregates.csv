@@ -1,0 +1,5 @@
+run,change,cache_location,time_to_world_s,world_samples,fps_median,fps_p10,pct_samples_under_3fps,vram_pct_of_budget,textures_alive,texture_blocks_free_mb,list_limit_stalls_per_frame
+H0,baseline (cache and saves on the HDD; menu advanced by hand),HDD,744,36,5.8,0.6,19,118,,,0.9
+T0,baseline (cache and saves on an SSD; auto-advance fixed),SSD,693,25,9.0,5.0,8,169,5889,3029,0.9
+T1,VICTORY_TEXTURE_POOL=0,SSD,527,34,9.2,3.0,9,86,13083,0,
+T2,VICTORY_TEXTURE_POOL=0 + VICTORY_LATE_WAIT_LISTS=256,SSD,482,36,9.4,5.7,6,89,10061,0,0.0
