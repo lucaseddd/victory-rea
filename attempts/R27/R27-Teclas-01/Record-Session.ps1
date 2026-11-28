@@ -5,7 +5,9 @@ param(
     [Parameter(Mandatory)][string]$Settings,
     [Parameter(Mandatory)][string]$Exe,
     # Where the history goes; set it to a folder of your own.
-    [string]$History = (Join-Path $PSScriptRoot 'history')
+    [string]$History = (Join-Path $PSScriptRoot 'history'),
+    # The game's data folder (where crash logs go); default: data\ beside the log.
+    [string]$DataDir = ''
 )
 # Waits for the game to close, then records the session's score (0-100) and archives the build that ran.
 # Score: performance 60 (median fps 40 + worst-10% fps 20, against 30 fps), stability 25 (no drops under
@@ -19,7 +21,8 @@ Start-Sleep -Seconds 2
 New-Item -ItemType Directory -Force (Join-Path $History 'builds') | Out-Null
 
 $start = [DateTime]::new($StartTicks, [DateTimeKind]::Utc).ToLocalTime()
-$rx = '^(?<d>\d\d/\d\d/\d{4}) (?<t>\d\d:\d\d:\d\d) .*host: (?<fps>[\d.]+) fps, (?<ms>[\d.]+) ms/frame.* (?<dr>\d+) draws/frame'
+# Local time (27/11/2026 14:52:11) or ISO in UTC (2026-11-27T19:55:40.000630Z), as different forks log it.
+$rx = '^(?:(?<d>\d\d/\d\d/\d{4}) (?<t>\d\d:\d\d:\d\d)|(?<iso>\d{4}-\d\d-\d\dT\S+Z)) .*host: (?<fps>[\d.]+) fps, (?<ms>[\d.]+) ms/frame.* (?<dr>\d+) draws/frame'
 $world = New-Object System.Collections.Generic.List[object]
 $first = $null; $vram = @(); $errors = 0; $removed = $false; $windowClosed = $false
 foreach ($line in [IO.File]::ReadLines($Log)) {
@@ -27,18 +30,23 @@ foreach ($line in [IO.File]::ReadLines($Log)) {
     if ($m.Success) {
         if ([int]$m.Groups['dr'].Value -ge 1000) {
             $world.Add([pscustomobject]@{ fps = [double]$m.Groups['fps'].Value; ms = [double]$m.Groups['ms'].Value })
-            if (-not $first) { $first = [DateTime]::ParseExact("$($m.Groups['d'].Value) $($m.Groups['t'].Value)", 'dd/MM/yyyy HH:mm:ss', $null) }
+            if (-not $first) {
+                $first = if ($m.Groups['iso'].Success) { [DateTimeOffset]::Parse($m.Groups['iso'].Value).LocalDateTime }
+                    else { [DateTime]::ParseExact("$($m.Groups['d'].Value) $($m.Groups['t'].Value)", 'dd/MM/yyyy HH:mm:ss', $null) }
+            }
         }
         continue
     }
-    if ($line.Contains(' ERROR ')) { $errors++ }
+    # Streamline's "presentCommon was not observed" is logged as an error but is harmless.
+    if ($line.Contains(' ERROR ') -and -not $line.Contains('presentCommon')) { $errors++ }
     if ($line.Contains('device removed') -or $line.Contains('0x887A0005') -or $line.Contains('0x887A0006')) { $removed = $true }
     if ($line.Contains('window closed')) { $windowClosed = $true }
     $v = [regex]::Match($line, "the card's own: budget (?<b>\d+) MB, in use (?<u>\d+) MB")
     if ($v.Success -and [double]$v.Groups['b'].Value -gt 0) { $vram += 100 * [double]$v.Groups['u'].Value / [double]$v.Groups['b'].Value }
 }
 $logEnd = (Get-Item -LiteralPath $Log).LastWriteTime
-$crash = @(Get-ChildItem (Join-Path (Split-Path $Log) 'data\7952987A\temp') -Filter '*.crash.log' -ErrorAction SilentlyContinue |
+$data = if ($DataDir) { $DataDir } else { Join-Path (Split-Path $Log) 'data' }
+$crash = @(Get-ChildItem (Join-Path $data '7952987A\temp') -Filter '*.crash.log' -ErrorAction SilentlyContinue |
     Where-Object { $_.LastWriteTime -ge $start -and $_.LastWriteTime -le $logEnd.AddMinutes(1) }).Count -gt 0
 
 function Pct([double[]]$xs, [double]$q) { if (-not $xs.Count) { return $null }; $s = $xs | Sort-Object; $s[[int][math]::Floor(($s.Count - 1) * $q)] }
@@ -53,9 +61,9 @@ $minutes = [int]($logEnd - $start).TotalMinutes
 
 $score = 0.0
 if ($fps.Count) {
-    $score += [math]::Min(1, $median / 30) * 40 + [math]::Min(1, $p10 / 30) * 20
+    $score += [math]::Min(1.0, $median / 30) * 40 + [math]::Min(1.0, $p10 / 30) * 20
     $score += (1 - $under3 / 100) * 15
-    if ($toWorld) { $score += [math]::Min(1, 300.0 / [math]::Max(1, $toWorld)) * 15 }
+    if ($toWorld) { $score += [math]::Min(1.0, 300.0 / [math]::Max(1, $toWorld)) * 15 }
 }
 if (-not $removed -and -not $crash -and $errors -eq 0) { $score += 10 }
 $score = [math]::Round($score, 1)
